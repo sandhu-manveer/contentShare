@@ -4,37 +4,15 @@ var minifyCss = require('gulp-minify-css');
 var sourceMaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
 var imageMin = require('gulp-imagemin');
-var handlebars = require('gulp-compile-handlebars');
-var rename = require('gulp-rename');
 var less = require('gulp-less');
 var autoprefixer = require('gulp-autoprefixer');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
-
-var menu = require('./menu.json');
-
-gulp.task('templates', function(){
-
-    var data = {
-        year: new Date().getFullYear(),
-        menu: menu.menuItems
-    };
-
-    var options = {
-        batch: ['src/templates/partials']
-    }
-
-    return gulp.src(['src/templates/**/*.hbs', '!src/templates/partials/**/*.hbs'])
-            .pipe(handlebars(data, options))
-            .pipe(rename(function(path) {
-                path.extname = '.html';
-            }))
-            .pipe(gulp.dest('./'))
-});
+var nodemon = require('gulp-nodemon');
 
 gulp.task('images', function() {
-    gulp.src(['src/img/**/*'])
+    gulp.src(['public/img/**/*'])
         .pipe(imageMin())
         .pipe(gulp.dest('dist/img'))
         .pipe(browserSync.stream());
@@ -42,7 +20,7 @@ gulp.task('images', function() {
 
 gulp.task('scripts', function(){
     var b = browserify({
-        entries: 'src/scripts/main.js',
+        entries: 'public/scripts/main.js',
         debug: true
     });
 
@@ -65,7 +43,7 @@ gulp.task('scripts', function(){
 });
 
 gulp.task('styles', function(){
-    gulp.src(['src/styles/**/*.less'])
+    gulp.src(['public/styles/**/*.less'])
         .pipe(sourceMaps.init())
         .pipe(less())
         .pipe(autoprefixer())
@@ -75,16 +53,34 @@ gulp.task('styles', function(){
         .pipe(browserSync.stream());
 });
 
-gulp.task('default', ['styles', 'images', 'scripts', 'templates'] , function(){
-    browserSync.init({
-        server: './'
-    });
-    // gulp.watch('src/**/*', browserSync.reload);
+gulp.task('browser-sync', ['nodemon'], function() {
+  browserSync.init({
+    proxy: "localhost:3000",  // local node app address
+    port: 5000,  // use *different* port than above
+    notify: true
+  });
+});
 
+gulp.task('nodemon', function(){
+    var stream = nodemon({ 
+        script: 'app.js',
+        ignore: ['public/scripts/**/*.js', 'dist/scripts/**/*.js'] // ignore frontend js changes
+        });
+ 
+    stream
+        .on('restart', function () {
+            console.log('restarted!');
+        })
+        .on('crash', function() {
+            console.error('Application has crashed!\n');
+            stream.emit('restart', 10);  // restart the server in 10 seconds 
+        });
+});
+
+gulp.task('default', ['styles', 'images', 'scripts', 'browser-sync'] , function(){
     // watch changes and perform task
-    gulp.watch('src/templates/**/*.hbs', ['templates']);
-    gulp.watch('src/img/**/*', ['images']);
-    gulp.watch('src/styles/**/*.less', ['styles']);
-    gulp.watch('src/scripts/**/*js', ['scripts']);
-    gulp.watch('*.html', browserSync.reload);
+    gulp.watch('public/img/**/*', ['images']);
+    gulp.watch('public/styles/**/*.less', ['styles']);
+    gulp.watch('public/scripts/**/*js', ['scripts']);
+    // gulp.watch('*.html', browserSync.reload);
 });
