@@ -1,0 +1,39 @@
+.menu-container {
+    background: @dark-bg;
+}
+
+.menu-list {
+    li {
+        padding: 4px;
+        margin-bottom: 1em;
+        line-height: 2;
+    }
+
+    .menu-title {
+        display: inline-block;
+        font-weight: bold;
+        width: 80%;
+    }
+
+    .menu-count {
+        display: inline-block;
+        background: @light-bg;
+        color: @red;
+        width: 20%
+    }
+
+}
+
+@media screen and (min-width:600px){
+    .menu-list{
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+
+        li {
+            width: 31%;
+            margin: 10px 1%;
+        }
+
+    }
+}
