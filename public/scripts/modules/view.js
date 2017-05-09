@@ -4,6 +4,7 @@ var view = module.exports = {
     init: function(){
         view.showCountdown();
         view.registerClick();
+        view.registerNavClick();
     },
 
     registerClick: function() {
@@ -33,5 +34,13 @@ var view = module.exports = {
         $('#years').append(diff.years);
         $('#months').append(diff.months);
         $('#days').append(diff.days);
+    },
+
+    registerNavClick: function() {
+        $(document).ready(function() {
+            // get current URL path and assign 'active' class
+            var pathname = window.location.pathname;
+            $('.nav > li > a[href="'+pathname+'"]').parent().addClass('active');
+        });
     }
 };

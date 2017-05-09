@@ -32,14 +32,6 @@ gulp.task('scripts', function(){
         .pipe(sourceMaps.write('./'))
         .pipe(gulp.dest('dist/scripts/'))
         .pipe(browserSync.stream());
-
-    // old
-    // gulp.src(['src/scripts/**/*.js'])
-    //     .pipe(sourceMaps.init())
-    //     .pipe(uglify())
-    //     .pipe(sourceMaps.write())
-    //     .pipe(gulp.dest('dist/scripts'))
-    //     .pipe(browserSync.stream());
 });
 
 gulp.task('styles', function(){
@@ -64,7 +56,7 @@ gulp.task('browser-sync', ['nodemon'], function() {
 gulp.task('nodemon', function(){
     var stream = nodemon({ 
         script: 'app.js',
-        ignore: ['public/scripts/**/*.js', 'dist/scripts/**/*.js'] // ignore frontend js changes
+        ignore: ['public/**/*', 'dist/**/*'] // ignore frontend js changes
         });
  
     stream
@@ -82,5 +74,5 @@ gulp.task('default', ['styles', 'images', 'scripts', 'browser-sync'] , function(
     gulp.watch('public/img/**/*', ['images']);
     gulp.watch('public/styles/**/*.less', ['styles']);
     gulp.watch('public/scripts/**/*js', ['scripts']);
-    // gulp.watch('*.html', browserSync.reload);
+    gulp.watch('views/**/*.hbs', browserSync.reload);
 });
