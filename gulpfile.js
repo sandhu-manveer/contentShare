@@ -35,7 +35,7 @@ gulp.task('scripts', function(){
 });
 
 gulp.task('styles', function(){
-    gulp.src(['public/styles/**/*.less'])
+    gulp.src(['public/styles/main.less'])
         .pipe(sourceMaps.init())
         .pipe(less())
         .pipe(autoprefixer())
@@ -73,6 +73,6 @@ gulp.task('default', ['styles', 'images', 'scripts', 'browser-sync'] , function(
     // watch changes and perform task
     gulp.watch('public/img/**/*', ['images']);
     gulp.watch('public/styles/**/*.less', ['styles']);
-    gulp.watch('public/scripts/**/*js', ['scripts']);
+    gulp.watch('public/scripts/**/*.js', ['scripts']);
     gulp.watch('views/**/*.hbs', browserSync.reload);
 });
