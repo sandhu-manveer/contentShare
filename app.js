@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var hbs = require('express-hbs');
 var passport = require("passport");
-require("./auth/passport-init");
+require("./routes/auth/passport-init");
 
 
 var app = express();
@@ -32,21 +32,28 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // auth route
-var authRouter = require("./auth/auth");
+var authRouter = require("./routes/auth/auth");
 app.use(authRouter);
 
+// check if user signed in
 app.use(function (req, res, next) {
   if (req.isAuthenticated()) {
     res.locals.user = req.user;
     next();
     return;
   }
-  res.redirect("/login");
+  next();
 });
 
+var apiRouter = require("./api/api");
+app.use("/api", apiRouter);
+
 app.get('/', function (req, res) {
-  res.render("index", {title: "Something Else"});
+  res.render("index", {user: res.locals.user});
 });
+
+var uploadRouter = require("./routes/upload");
+app.use(uploadRouter);
 
 // define routes
 app.get('/page1', function (req, res) {
@@ -60,8 +67,6 @@ app.get('/page2', function (req, res) {
 app.get('/page3', function (req, res) {
   res.render("index", {title: "Something Else"});
 });
-
-
 
 app.listen(3000, function () {
   console.log('App listening on port 3000');

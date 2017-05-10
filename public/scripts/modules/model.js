@@ -2,7 +2,7 @@ var request = require('superagent');
 
 var model = module.exports = {
     init: function(){
-        model.getData();
+       console.log('Model Init');
     },
 
     currentDate: new Date(),
@@ -14,12 +14,5 @@ var model = module.exports = {
         id: null
     }, 
     
-    menu: {},
-
-    getData: function() {
-        request.get('menu.json', function(err, res){
-            model.menu = JSON.parse(res.text).menuItems;
-        });
-    }
-
+    menu: {}
 };

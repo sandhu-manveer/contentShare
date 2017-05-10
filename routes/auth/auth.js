@@ -1,7 +1,6 @@
 var express = require('express');
 var passport = require('passport');
-var _ = require('lodash');
-var appDB = require('../data/appDB');
+var appDB = require('../../data/appDB');
 var User = appDB.User;
 
 var router = express.Router();

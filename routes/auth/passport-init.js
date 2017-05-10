@@ -2,7 +2,7 @@ var passport = require('passport');
 var localStrategy = require('passport-local').Strategy;
 var _ = require('lodash');
 var mongoose = require('mongoose');
-var appDB = require('../data/appDB');
+var appDB = require('../../data/appDB');
 var User = appDB.User;
 
 passport.use(new localStrategy(function(alias, password, done){
@@ -26,7 +26,9 @@ passport.use(new localStrategy(function(alias, password, done){
                 }
             });
 
+        
             // done(null, user); removing this prevented cant set headers err. why? ref:http://stackoverflow.com/questions/25550249/node-js-passport-error-cant-set-headers-after-they-are-sent-at-serverrespon
+            // because async exec, this done is called before the function above finishes exec
         })
         .catch(error => console.log(error));
 }));

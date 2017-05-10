@@ -46,11 +46,13 @@ gulp.task('styles', function(){
 });
 
 gulp.task('browser-sync', ['nodemon'], function() {
-  browserSync.init({
-    proxy: "localhost:3000",  // local node app address
-    port: 5000,  // use *different* port than above
-    notify: true
-  });
+  setTimeout(() => { 
+      browserSync.init({
+          proxy: "localhost:3000",  // local node app address
+          port: 5000,  // use *different* port than above
+          notify: true
+        }) 
+    }, 5000);
 });
 
 gulp.task('nodemon', function(){

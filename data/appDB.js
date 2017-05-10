@@ -14,11 +14,13 @@ var connectMongoose = mongoose.connect(url);
 // mongoose.set('debug', true);
 
 var User = require('../models/userModel.js');
+var Post = require('../models/postModel.js');
 
 module.exports = {
     connect,
     connectMongoose,
     User,
+    Post,
     close: function(callback) {
         connect
         .then(db => {
