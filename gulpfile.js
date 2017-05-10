@@ -55,6 +55,7 @@ gulp.task('browser-sync', ['nodemon'], function() {
 
 gulp.task('nodemon', function(){
     var stream = nodemon({ 
+        exec: 'node --debug',
         script: 'app.js',
         ignore: ['public/**/*', 'dist/**/*'] // ignore frontend js changes
         });
