@@ -4,7 +4,6 @@ var hbs = require('express-hbs');
 var passport = require("passport");
 require("./routes/auth/passport-init");
 
-
 var app = express();
 
 // static files
@@ -52,9 +51,6 @@ app.get('/', function (req, res) {
   res.render("index", {user: res.locals.user});
 });
 
-var uploadRouter = require("./routes/upload");
-app.use(uploadRouter);
-
 // define routes
 app.get('/page1', function (req, res) {
   res.render("index", {title: "Something Else"});
@@ -67,6 +63,9 @@ app.get('/page2', function (req, res) {
 app.get('/page3', function (req, res) {
   res.render("index", {title: "Something Else"});
 });
+
+var uploadRouter = require("./routes/upload");
+app.use(uploadRouter);
 
 app.listen(3000, function () {
   console.log('App listening on port 3000');

@@ -2,45 +2,54 @@ var helper = require('./helper.js');
 
 var view = module.exports = {
     init: function(){
-        view.showCountdown();
-        view.registerClick();
-        view.registerNavClick();
+        view.setInfScroll()
+
+        view.postsData = helper.getCurrentPostData();
+        helper.setPostsTimestamp();
+        view.renderPosts();
     },
 
-    registerClick: function() {
-        var id;
-        var listItem = document.querySelectorAll('#menu li');
+    postsData: [],
 
-        for(var i = 0; i < listItem.length; i++) {
-            listItem[i].addEventListener('click', function(){
-                id = this.getAttribute('data-id');
-                helper.setCurrent(+id);
-                helper.increment();
-                view.updateCount();
+    setInfScroll: function() {
+
+        this.initialize = function() {
+            this.setupEvents();
+        };
+
+        this.setupEvents = function() {
+            $(window).on(
+                'scroll',
+                this.handleScroll.bind(this)
+            );
+        };
+
+
+        this.handleScroll = function() {
+            $(document).ready(function() {
+                var scrollTop = $(document).scrollTop();
+                var windowHeight = $(window).height();
+                var height = $(document).height() - windowHeight;
+                var scrollPercentage = (scrollTop / height);
+
+                // if the scroll is more than 90% from the top, load more content.
+                if(scrollPercentage > 0.8) {
+                    helper.getPostData();
+                    helper.setPostsTimestamp();
+                    view.postsData = helper.getCurrentPostData();
+                    view.renderPosts();
+                }
             });
+            
         }
+
+        this.initialize();
     },
 
-    updateCount: function() {
-        var item = helper.getCurrent();
-        var li = $('[data-id="'+ item.id +'"]');
-        var count = li.find('.menu-count');
-        count.html(item.count);
-    },
-
-    showCountdown: function(){
-        var diff = helper.dateDiff();
-
-        $('#years').append(diff.years);
-        $('#months').append(diff.months);
-        $('#days').append(diff.days);
-    },
-
-    registerNavClick: function() {
-        $(document).ready(function() {
-            // get current URL path and assign 'active' class
-            var pathname = window.location.pathname;
-            $('.nav > li > a[href="'+pathname+'"]').parent().addClass('active');
+    renderPosts: function() {
+        var posts = view.postsData;
+        posts.body.forEach(function(element, index, array){
+            $('.maincontent-container').append('<article class="maincontent-post"><h1>' + element.title + '</h1></article>');
         });
     }
 };

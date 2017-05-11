@@ -3,24 +3,16 @@ var model = require('./model.js');
 
 var helper = module.exports = {
 
-    dateDiff: function() {
-        return countdown(model.currentDate, model.eventDate);
-    }, 
-
-    setCurrent: function(id) {
-        for(var i = 0; i < model.menu.length; i++){
-            if(model.menu[i].id === id) {
-                model.menuItem = model.menu[i];
-            }
-        }
+    getCurrentPostData: function() {
+        return model.postData;
     },
 
-    getCurrent: function() {
-        return model.menuItem; 
+    getPostData: function() {
+        model.getPostData(new Date(model.lastTime));
     },
 
-    increment: function(){
-        model.menuItem.count++;
+    setPostsTimestamp: function() {        
+        model.lastTime = model.postData.body[model.postData.body.length - 1].postedTime;
     }
 
 };

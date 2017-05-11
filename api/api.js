@@ -7,16 +7,30 @@ var Post = appDB.Post;
 var router = express.Router();
 module.exports = router;
 
-router.use(function (req, res, next) {
+/**
+ * middleware function to check authentication
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+function checkAuth(req, res, next) {
   if (req.isAuthenticated()) {
     res.locals.user = req.user;
     next();
     return;
   }
   res.redirect('/login');
-});
+}
 
+/**
+ * Route to upload post to mongoDB
+ * 
+ */
 router.route('/uploadPost')
+    .all(function(req, res, next){
+        checkAuth(req, res, next);
+    })
     .post(function(req, res, next){
         if (!req.body.title) {
             res.sendStatus(500);
@@ -25,10 +39,10 @@ router.route('/uploadPost')
 
         var post = new Post();
         createPostFromRequestObj(post, req);
-
+        
         post.save()
             .then(() => {
-                console.log("saved") // remove
+                res.status(200);
                 res.redirect('/');
             })  
             .catch((error) => {
@@ -37,7 +51,41 @@ router.route('/uploadPost')
             });
     });
 
+/**
+ * Helper function to create mongoose post document
+ * 
+ * @param {*} post 
+ * @param {*} request 
+ */
 function createPostFromRequestObj(post, request){
     post.title = request.body.title;
     post.postedBy = mongoose.Types.ObjectId(request.session.passport.user);
 }
+
+/**
+ * Route to get posts
+ */
+router.route('/getPosts')
+    .get(function(req, res, next){
+        var timeStamp = null;
+
+        if(!req.query.lastTime){
+            timeStamp = new Date();
+        } else {
+            timeStamp = req.query.lastTime;
+        }
+
+        var searchFilter = {
+            postedTime: {
+                $lt : timeStamp
+            }
+        };
+
+        Post.find(searchFilter).sort({postedTime:-1}).limit(10)
+            .then((documents) => {
+                // console.log(documents[documents.length - 1]);
+                res.json(documents);
+            })
+            .catch((error) => next(error));
+
+    });
