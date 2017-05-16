@@ -2,11 +2,15 @@ var helper = require('./helper.js');
 
 var view = module.exports = {
     init: function(){
-        view.setInfScroll()
+        view.setInfScroll();
 
-        view.postsData = helper.getCurrentPostData();
-        helper.setPostsTimestamp();
-        view.renderPosts();
+        helper.getPostData()
+            .then(function(res){
+                view.postsData = helper.getCurrentPostData();
+                helper.setPostsTimestamp();
+                view.renderPosts();
+            })
+            .catch(function(err){console.log(err);});;
     },
 
     postsData: [],
@@ -32,12 +36,15 @@ var view = module.exports = {
                 var height = $(document).height() - windowHeight;
                 var scrollPercentage = (scrollTop / height);
 
-                // if the scroll is more than 90% from the top, load more content.
+                // if the scroll is more than 80% from the top, load more content.
                 if(scrollPercentage > 0.8) {
-                    helper.getPostData();
-                    helper.setPostsTimestamp();
-                    view.postsData = helper.getCurrentPostData();
-                    view.renderPosts();
+                    helper.getPostData()
+                        .then(function(res){
+                            helper.setPostsTimestamp();
+                            view.postsData = helper.getCurrentPostData();
+                            view.renderPosts();
+                        })
+                        .catch(function(err){console.log(err);});;
                 }
             });
             

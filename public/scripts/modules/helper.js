@@ -1,4 +1,3 @@
-var countdown = require('countdown');
 var model = require('./model.js');
 
 var helper = module.exports = {
@@ -8,7 +7,7 @@ var helper = module.exports = {
     },
 
     getPostData: function() {
-        model.getPostData(new Date(model.lastTime));
+        return model.getPostData(new Date(model.lastTime));
     },
 
     setPostsTimestamp: function() {        

@@ -17,14 +17,15 @@ var model = module.exports = {
      * @param Date() lastTime
      */
     getPostData: function(lastTime) {
-        request
+        return new Promise(function(resolve, reject){
+            request
             .get('/api/getPosts')
             .query('lastTime='+ lastTime.toISOString() + '')
             .end(function(err, response){
                 if(err) { console.log("error>>", err); } // remove
                 model.postData = response;
-                model.fetchComplete = true;
+                resolve(model.postData);
             });
+        });
     }
-
 };
