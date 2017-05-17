@@ -65,6 +65,7 @@ gulp.task('nodemon', function(){
     stream
         .on('restart', function () {
             console.log('restarted!');
+            setTimeout(() => browserSync.reload(), 8000);
         })
         .on('crash', function() {
             console.error('Application has crashed!\n');

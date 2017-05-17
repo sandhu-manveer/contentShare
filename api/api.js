@@ -32,7 +32,7 @@ router.route('/uploadPost')
         checkAuth(req, res, next);
     })
     .post(function(req, res, next){
-        if (!req.body.title) {
+        if (!req.body.title || req.body.title.length < 5) {
             res.sendStatus(500);
             return;
         }
@@ -83,7 +83,9 @@ router.route('/getPosts')
 
         Post.find(searchFilter).sort({postedTime:-1}).limit(10)
             .then((documents) => {
-                // console.log(documents[documents.length - 1]);
+                // build post html. here?
+                documents.sort((a, b) => b.postedTime - a.postedTime)
+
                 res.json(documents);
             })
             .catch((error) => next(error));

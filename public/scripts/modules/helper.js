@@ -12,6 +12,10 @@ var helper = module.exports = {
 
     setPostsTimestamp: function() {        
         model.lastTime = model.postData.body[model.postData.body.length - 1].postedTime;
+    },
+
+    getPostsTimestamp: function() {        
+        return model.lastTime;
     }
 
 };

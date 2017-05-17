@@ -3,17 +3,10 @@ var helper = require('./helper.js');
 var view = module.exports = {
     init: function(){
         view.setInfScroll();
-
-        helper.getPostData()
-            .then(function(res){
-                view.postsData = helper.getCurrentPostData();
-                helper.setPostsTimestamp();
-                view.renderPosts();
-            })
-            .catch(function(err){console.log(err);});;
+        view.fetchAndRender();
     },
 
-    postsData: [],
+    isActive: false,
 
     setInfScroll: function() {
 
@@ -33,30 +26,33 @@ var view = module.exports = {
             $(document).ready(function() {
                 var scrollTop = $(document).scrollTop();
                 var windowHeight = $(window).height();
-                var height = $(document).height() - windowHeight;
-                var scrollPercentage = (scrollTop / height);
 
-                // if the scroll is more than 80% from the top, load more content.
-                if(scrollPercentage > 0.8) {
-                    helper.getPostData()
-                        .then(function(res){
-                            helper.setPostsTimestamp();
-                            view.postsData = helper.getCurrentPostData();
-                            view.renderPosts();
-                        })
-                        .catch(function(err){console.log(err);});;
+                // end of page reached
+                if (!view.isActive && $(document).height() - windowHeight == scrollTop) {
+                    view.isActive = true;
+                    $('#loading').show();
+                    view.fetchAndRender();
                 }
             });
-            
         }
 
         this.initialize();
     },
 
+    fetchAndRender: function() {
+        helper.getPostData()
+            .then(function(res){
+                    view.renderPosts();
+                    $('#loading').hide();        
+            })
+            .catch(function(err){console.log(err);});
+    },
+
     renderPosts: function() {
-        var posts = view.postsData;
+        var posts = helper.getCurrentPostData();
         posts.body.forEach(function(element, index, array){
             $('.maincontent-container').append('<article class="maincontent-post"><h1>' + element.title + '</h1></article>');
         });
+        view.isActive = false;
     }
 };
