@@ -1,15 +1,16 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var hbs = require('express-hbs');
-var passport = require("passport");
-require("./routes/auth/passport-init");
+var passport = require('passport');
+require('./routes/auth/passport-init');
 
 var app = express();
 
 // static files
-app.use(express.static(__dirname + "/dist"));
-app.use(express.static(__dirname + "/node_modules/jquery/dist"));
-app.use(express.static(__dirname + "/node_modules/bootstrap/dist"));
+app.use(express.static(__dirname + '/dist'));
+app.use(express.static(__dirname + '/node_modules/jquery/dist'));
+app.use(express.static(__dirname + '/node_modules/bootstrap/dist'));
+app.use(express.static(__dirname + '/node_modules/jsrender'))
 
 // handlebars setup
 app.engine('hbs', hbs.express3({
@@ -24,7 +25,7 @@ app.use(bodyParser.json());
 
 // express-session for session based auth
 app.use(require('express-session')({
-  secret: 'keyboard cat', resave: false, saveUninitialized: false
+  secret: 'some random secret', resave: false, saveUninitialized: false
 }));
 // passport setup
 app.use(passport.initialize());

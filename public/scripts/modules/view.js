@@ -6,6 +6,14 @@ var view = module.exports = {
         view.fetchAndRender();
     },
 
+    postTemplate: $.templates('<article class="maincontent-post">{{:header}} {{:media}}</article>'),
+
+    postMediaTemplate: $.templates('<figure class="maincontent-post-media"></figure>'),
+
+    postHeaderTemplate: $.templates('<header class="maincontent-post-header"><h3>{{:title}}</h3><p>{{:author}}<p></header>'),
+    
+    postDetailsTemplate: $.templates('<div class="maincontent-post-details"></div>'),
+
     isActive: false,
 
     setInfScroll: function() {
@@ -51,7 +59,14 @@ var view = module.exports = {
     renderPosts: function() {
         var posts = helper.getCurrentPostData();
         posts.body.forEach(function(element, index, array){
-            $('.maincontent-container').append('<article class="maincontent-post"><h1>' + element.title + '</h1></article>');
+            $('.maincontent-container').append(view.postTemplate.render({
+                header: view.postHeaderTemplate.render({
+                    title: element.title,
+                    author: 'HC author'
+                }),
+
+                media: view.postMediaTemplate.render({})
+            }));
         });
         view.isActive = false;
     }
