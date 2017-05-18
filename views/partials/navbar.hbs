@@ -1,5 +1,5 @@
 <section class="navbar-container">
-  <nav class="navbar navbar-default">
+  <nav class="navbar navbar-inverse">
     <div class="container-fluid">
       <!-- Brand and toggle get grouped for better mobile display -->
       <div class="navbar-header">
@@ -9,30 +9,31 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="/">Brand</a>
+        <a class="navbar-brand" href="/"> <img src="" alt="logo" height="30" width="250"></a>
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav">
-          <li><a href="/page1">Page1</a></li>
-          <li><a href="/page2">Page2</a></li>
-          <li><a href="/page3">Page3</a></li>
+          <li><a href="/page1">Photos</a></li>
+          <li><a href="/page2">GIFs</a></li>
+          <li><a href="/page3">Videos</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           {{# if user}}
           <li><a href="/upload">Post</a></li>
           {{/ if}}
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">More+<span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li><a href="/login">Sign In</a></li>
-              <li><a href="#">Another action</a></li>
-              <li><a href="#">Something else here</a></li>
+              <li><a href="#">Blog</a></li>
+              <li><a href="#">Health</a></li>
               {{# if user}}
               <li role="separator" class="divider"></li>
               <li><a href="/logout">Logout</a></li>
               {{/ if}}
+
             </ul>
           </li>
         </ul>

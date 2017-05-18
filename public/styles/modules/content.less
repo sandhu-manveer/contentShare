@@ -20,9 +20,50 @@
 }
 
 .maincontent-post-details{
+    display:inline-block;
     
 }
+.post-upvote{
+    float:left;
+    margin-left:5px;
+    margin-right:5px;
+}
+.post-downvote{
+    float:left;
+    margin-left:5px;
+    margin-right:5px;
+}
+.vote-count{
+    display:inline-block;
+    margin-left:5px;
+    margin-right:5px;
+}
+.post-upvote-do {
+  display: inline-block;
+  overflow: hidden;
+  width: 40px;
+  height: 25px;
+  cursor: pointer;
+  background: url('../img/upvote.png');
+  background-position: 0 -25px;
+} 
+.post-downvote-do {
+  display: inline-block;
+  overflow: hidden;
+  width: 40px;
+  height: 25px;
+  cursor: pointer;
+  background: url('../img/downvote.png');
+  background-position: 0 -61px;
+} 
 
+
+.post-upvote-do.on {
+  background-position: 0 2px;
+}
+.post-downvote-do.on{
+    background-position: 0 -33px;
+}
 .maincontent-post-media {
     height: 250px;
 }

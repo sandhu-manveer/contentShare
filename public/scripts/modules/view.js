@@ -6,13 +6,19 @@ var view = module.exports = {
         view.fetchAndRender();
     },
 
-    postTemplate: $.templates('<article class="maincontent-post">{{:header}} {{:media}}</article>'),
+    postTemplate: $.templates('<article class="maincontent-post">{{:header}} {{:media}} {{:details}}</article>'),
 
     postMediaTemplate: $.templates('<figure class="maincontent-post-media"></figure>'),
 
     postHeaderTemplate: $.templates('<header class="maincontent-post-header"><h3>{{:title}}</h3><p>{{:author}}<p></header>'),
     
-    postDetailsTemplate: $.templates('<div class="maincontent-post-details"></div>'),
+    postDetailsTemplate: $.templates('<div class="maincontent-post-details">{{:upvote}} {{:downvote}} {{:votecount}} </div>'),
+
+    postUpvoteTemplate: $.templates('<div class="post-upvote"><span class="post-upvote-do"></span></div>'),
+
+    postDownvoteTemplate: $.templates('<div class="post-downvote"><span class="post-downvote-do"></span></div>'),
+
+    postcountTemplate: $.templates('<div class="vote-count"><span>{{:upvote_count}}</span></div>'),
 
     isActive: false,
 
@@ -51,7 +57,8 @@ var view = module.exports = {
         helper.getPostData()
             .then(function(res){
                     view.renderPosts();
-                    $('#loading').hide();        
+                    $('#loading').hide();    
+                    view.initToggle();    
             })
             .catch(function(err){console.log(err);});
     },
@@ -65,9 +72,26 @@ var view = module.exports = {
                     author: 'HC author'
                 }),
 
-                media: view.postMediaTemplate.render({})
+                media: view.postMediaTemplate.render({}),
+                details: view.postDetailsTemplate.render({
+                    upvote:view.postUpvoteTemplate.render({}),
+                    downvote:view.postDownvoteTemplate.render({}),
+                    votecount:view.postcountTemplate.render({
+                        upvote_count:20
+                    })
+                })
             }));
         });
         view.isActive = false;
+     },
+
+    initToggle: function() {
+        $('.post-downvote-do').click(function() {
+            $(this).toggleClass('on');
+            });
+        $('.post-upvote-do').click(function() {
+            $(this).toggleClass('on');
+            }
+        );
     }
 };
