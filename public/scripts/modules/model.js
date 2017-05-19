@@ -10,6 +10,8 @@ var model = module.exports = {
 
     lastTime: null, 
 
+    voteResponse: {},
+
     /**
      * @param Date() lastTime
      */
@@ -24,6 +26,18 @@ var model = module.exports = {
                 model.lastTime = new Date(response.body[response.body.length - 1].postedTime);
                 console.log(model.lastTime);
                 resolve(model.postData);
+            });
+        });
+    },
+
+    upvotePost: function(postId) {
+        return new Promise(function(resolve, reject){
+            request
+            .get('/api/upvote')
+            .query('postId='+ postId + '')
+            .end(function(err, response){
+                model.voteResponse = response;
+                resolve(model.voteResponse);
             });
         });
     }

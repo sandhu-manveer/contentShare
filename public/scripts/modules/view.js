@@ -6,7 +6,7 @@ var view = module.exports = {
         view.fetchAndRender();
     },
 
-    postTemplate: $.templates('<article class="maincontent-post">{{:header}} {{:media}} {{:details}}</article>'),
+    postTemplate: $.templates('<article class="maincontent-post" post-id="{{:postId}}">{{:header}} {{:media}} {{:details}}</article>'),
 
     postMediaTemplate: $.templates('<figure class="maincontent-post-media"></figure>'),
 
@@ -21,6 +21,8 @@ var view = module.exports = {
     postcountTemplate: $.templates('<div class="vote-count"><span>{{:upvote_count}}</span></div>'),
 
     isActive: false,
+
+    isUpVoted: false,
 
     setInfScroll: function() {
 
@@ -57,7 +59,8 @@ var view = module.exports = {
         helper.getPostData()
             .then(function(res){
                     view.renderPosts();
-                    $('#loading').hide();    
+                    $('#loading').hide();
+                    // initialize click listeners after fetch
                     view.initToggle();    
             })
             .catch(function(err){console.log(err);});
@@ -67,9 +70,12 @@ var view = module.exports = {
         var posts = helper.getCurrentPostData();
         posts.body.forEach(function(element, index, array){
             $('.maincontent-container').append(view.postTemplate.render({
+
+                postId: element._id,
+
                 header: view.postHeaderTemplate.render({
                     title: element.title,
-                    author: 'HC author'
+                    author: element.postedBy.alias
                 }),
 
                 media: view.postMediaTemplate.render({}),
@@ -86,12 +92,22 @@ var view = module.exports = {
      },
 
     initToggle: function() {
+        $('.post-upvote-do').click(function() {
+            var postId = $(this).parents('article').attr('post-id');
+            helper.upvotePost(postId)
+                .then(function(res){
+                    var response = helper.getVoteResponse();
+                    console.log(response);
+                    if(!response.body.isLoggedIn) {
+                        window.location.href = window.location.origin + '/login';
+                    }
+                    $(this).toggleClass('on');
+                })
+                .catch(function(err){console.log(err);})
+        });
+
         $('.post-downvote-do').click(function() {
             $(this).toggleClass('on');
-            });
-        $('.post-upvote-do').click(function() {
-            $(this).toggleClass('on');
-            }
-        );
+        });
     }
 };

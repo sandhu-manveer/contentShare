@@ -7,7 +7,7 @@ var helper = module.exports = {
     },
 
     getPostData: function() {
-        return model.getPostData(new Date(model.lastTime));
+        return model.getPostData();
     },
 
     setPostsTimestamp: function() {        
@@ -16,6 +16,14 @@ var helper = module.exports = {
 
     getPostsTimestamp: function() {        
         return model.lastTime;
+    },
+
+    getVoteResponse: function() {
+        return model.voteResponse;
+    },
+
+    upvotePost: function(postId) {
+        return model.upvotePost(postId);
     }
 
 };

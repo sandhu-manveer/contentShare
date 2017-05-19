@@ -1,26 +1,29 @@
 var express = require("express");
 var mongoose = require('mongoose');
+var _ = require('lodash');
 
 var appDB = require('../data/appDB');
 var Post = appDB.Post;
+var User = appDB.User;
 
 var router = express.Router();
 module.exports = router;
 
 /**
  * middleware function to check authentication
+ * set for all routes?
  * 
  * @param {*} req 
  * @param {*} res 
  * @param {*} next 
  */
 function checkAuth(req, res, next) {
-  if (req.isAuthenticated()) {
-    res.locals.user = req.user;
-    next();
-    return;
-  }
-  res.redirect('/login');
+    if (req.isAuthenticated()) {
+        res.locals.user = req.user;
+        next();
+        return;
+    }
+    res.redirect('/login');
 }
 
 /**
@@ -81,13 +84,69 @@ router.route('/getPosts')
             }
         };
 
-        Post.find(searchFilter).sort({postedTime:-1}).limit(10)
+        // check correct way to name collection and model
+        // ensure password is not returned
+        Post.find(searchFilter).populate('postedBy', ['alias']).sort({postedTime:-1}).limit(10)
             .then((documents) => {
-                // build post html. here?
-                documents.sort((a, b) => b.postedTime - a.postedTime)
-
+                // get usernames
+                // check correct approach
+                // async not required as ref is used
+                documents.sort((a, b) => b.postedTime - a.postedTime);
                 res.json(documents);
             })
             .catch((error) => next(error));
+    });
 
+/**
+ * Route to upvote post
+ */
+router.route('/upvote')
+    .all(function(req, res, next){
+        if (req.isAuthenticated()) {
+            res.locals.user = req.user;
+            next();
+            return;
+        }
+        res.json({ isLoggedIn: false });
+    })
+    .get(function(req, res, next){
+        
+        if(req.query.postId) {
+            console.log(req.query.postId);
+            console.log(req.session.passport.user);
+        }
+
+        var searchFilter = {
+            _id: mongoose.Types.ObjectId(req.query.postId)
+        };
+
+        Post.findOne(searchFilter).exec()
+            .then((document) => {
+                var vote = _.find(document.votes, {'user_id': mongoose.Types.ObjectId(req.session.passport.user)});
+
+                if (vote) {
+                    if ( vote.vote > 0) {
+                        vote.vote = 0;
+                    } else {
+                        vote.vote = 1;
+                    }
+                } else {
+                    vote.user_id = mongoose.Types.ObjectId(req.session.passport.user);
+                    vote.vote = 1;
+                }
+
+                document.update({
+                    "votes.user_id": mongoose.Types.ObjectId(req.session.passport.user)
+                    },{
+                        $set: { "votes.$" : vote}
+                    },{
+                        upsert: true // create if does not exist
+                    }).exec()
+                    .then((response) => {
+                        res.send('Upvote Endpoint');
+                    })
+                    .catch((err) => next(err));
+
+            })
+            .catch((err) => next(err));
     });

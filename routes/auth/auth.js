@@ -1,34 +1,40 @@
 var express = require('express');
 var passport = require('passport');
 var appDB = require('../../data/appDB');
+var request = require('request');
 var User = appDB.User;
 
 var router = express.Router();
 module.exports = router;
 
 router.route('/login')
-    .get(function(req, res, next){
-            // console.log(req);
-            // dev autologin
-            /*if(req.app.get('env') === 'development') {
-               
-                // TODO: fixed user for testing
-                var user = users[0];
+    .all(function(req, res, next){
+        // dev autologin
+        // remove and check everything is working
+        if(req.app.get('env') === 'development') {
+            var userId = {_id:'5912994c0b2fd617a42811df'};
 
-
-                if (req.query.user) {
-                    // user = _.find(users, u  => u.name === req.query.user);
-                    User.find({alias: req.query.user}).exec()
-                        .then(user => {
-                            req.logIn(user, function(err, next){
-                                if(err) { return next(err); }
+            if(req.query.user) {
+                User.findOne({alias: req.query.user}).exec()
+                    .then((response) => {
+                        userId = response;
+                        req.logIn(userId, function(err){
+                            if(err) { return console.log(err); }
                                 return res.redirect('/');
                             });
-                            return; 
-                        })
-                        .catch(next);
-                }
-            }*/
+                            return;
+                    })
+                    .catch(next);
+            } else {
+                req.logIn(userId, function(err){
+                    if(err) { return console.log(err); }
+                    return res.redirect('/');
+                });
+                return; 
+            }
+        } 
+    })
+    .get(function(req, res, next){
             res.render('auth');
         })
     .post(passport.authenticate('local', {
