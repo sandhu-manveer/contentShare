@@ -111,9 +111,8 @@ router.route('/upvote')
     })
     .get(function(req, res, next){
         
-        if(req.query.postId) {
-            console.log(req.query.postId);
-            console.log(req.session.passport.user);
+        if(!req.query.postId) {
+            next();
         }
 
         var searchFilter = {
@@ -122,7 +121,7 @@ router.route('/upvote')
 
         Post.findOne(searchFilter).exec()
             .then((document) => {
-                var vote = _.find(document.votes, {'user_id': mongoose.Types.ObjectId(req.session.passport.user)});
+                var vote = _.find(document.votes, {user_id: mongoose.Types.ObjectId(req.session.passport.user)});
 
                 if (vote) {
                     if ( vote.vote > 0) {
@@ -131,22 +130,13 @@ router.route('/upvote')
                         vote.vote = 1;
                     }
                 } else {
+                    var vote = {};
                     vote.user_id = mongoose.Types.ObjectId(req.session.passport.user);
                     vote.vote = 1;
+
+                    document.votes.push(vote);
                 }
-
-                document.update({
-                    "votes.user_id": mongoose.Types.ObjectId(req.session.passport.user)
-                    },{
-                        $set: { "votes.$" : vote}
-                    },{
-                        upsert: true // create if does not exist
-                    }).exec()
-                    .then((response) => {
-                        res.send('Upvote Endpoint');
-                    })
-                    .catch((err) => next(err));
-
+                document.save();
             })
             .catch((err) => next(err));
     });
