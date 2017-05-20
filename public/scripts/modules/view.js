@@ -1,4 +1,5 @@
 var helper = require('./helper.js');
+var _ = require('lodash');
 
 var view = module.exports = {
     init: function(){
@@ -14,9 +15,9 @@ var view = module.exports = {
     
     postDetailsTemplate: $.templates('<div class="maincontent-post-details">{{:upvote}} {{:downvote}} {{:votecount}} </div>'),
 
-    postUpvoteTemplate: $.templates('<div class="post-upvote"><span class="post-upvote-do"></span></div>'),
+    postUpvoteTemplate: $.templates('<div class="post-upvote"><span class="post-upvote-do{{:upVoted}}"></span></div>'),
 
-    postDownvoteTemplate: $.templates('<div class="post-downvote"><span class="post-downvote-do"></span></div>'),
+    postDownvoteTemplate: $.templates('<div class="post-downvote"><span class="post-downvote-do{{:downVoted}}"></span></div>'),
 
     postcountTemplate: $.templates('<div class="vote-count"><span>{{:upvote_count}}</span></div>'),
 
@@ -68,7 +69,22 @@ var view = module.exports = {
 
     renderPosts: function() {
         var posts = helper.getCurrentPostData();
-        posts.body.forEach(function(element, index, array){
+        
+        // too slow?
+        // iteration over all the votes, correct
+        if(posts.body.user) {
+            for (var i=0; i < posts.body.documents.length; i++) {
+                var vote = _.find(posts.body.documents[i].votes, {user_id: posts.body.user}); // works. why?
+                posts.body.documents[i].upVoted = '';
+                posts.body.documents[i].downVoted = '';
+                if (vote && vote.vote !== 0) {
+                    if ( vote.vote > 0) posts.body.documents[i].upVoted = 'on';
+                    else if ( vote.vote < 0 ) posts.body.documents[i].downVoted = 'on';
+                } 
+            }
+        }
+        console.log(posts);
+        posts.body.documents.forEach(function(element, index, array){
             $('.maincontent-container').append(view.postTemplate.render({
 
                 postId: element._id,
@@ -80,8 +96,12 @@ var view = module.exports = {
 
                 media: view.postMediaTemplate.render({}),
                 details: view.postDetailsTemplate.render({
-                    upvote:view.postUpvoteTemplate.render({}),
-                    downvote:view.postDownvoteTemplate.render({}),
+                    upvote:view.postUpvoteTemplate.render({
+                        upVoted: ' ' + element.upVoted
+                    }),
+                    downvote:view.postDownvoteTemplate.render({
+                        downVoted: ' ' + element.downVoted
+                    }),
                     votecount:view.postcountTemplate.render({
                         upvote_count:20
                     })
@@ -92,7 +112,7 @@ var view = module.exports = {
      },
 
     initToggle: function() {
-        $('.post-upvote-do').click(function() {
+        $('[class^=post-upvote-do]').click(function() {
             var postId = $(this).parents('article').attr('post-id');
             helper.upvotePost(postId)
                 .then(function(res){
@@ -106,7 +126,7 @@ var view = module.exports = {
                 .catch(function(err){console.log(err);})
         });
 
-        $('.post-downvote-do').click(function() {
+        $('[class^=post-upvote-do]').click(function() {
             $(this).toggleClass('on');
         });
     }

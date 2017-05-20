@@ -69,6 +69,15 @@ function createPostFromRequestObj(post, request){
  * Route to get posts
  */
 router.route('/getPosts')
+    .all(function(req, res, next){
+        // how to reuse under
+        if (req.isAuthenticated()) {
+            res.locals.user = req.user;
+            next();
+            return;
+        }
+        next();
+    })
     .get(function(req, res, next){
         var timeStamp = null;
 
@@ -88,11 +97,17 @@ router.route('/getPosts')
         // ensure password is not returned
         Post.find(searchFilter).populate('postedBy', ['alias']).sort({postedTime:-1}).limit(10)
             .then((documents) => {
+                var responseJSON = {};
                 // get usernames
                 // check correct approach
                 // async not required as ref is used
                 documents.sort((a, b) => b.postedTime - a.postedTime);
-                res.json(documents);
+                responseJSON.documents = documents;
+                // can user be accessed from frontend
+                if (res.locals.user) {
+                    responseJSON.user = res.locals.user._id;
+                }
+                res.json(responseJSON);
             })
             .catch((error) => next(error));
     });
@@ -121,7 +136,7 @@ router.route('/upvote')
 
         Post.findOne(searchFilter).exec()
             .then((document) => {
-                var vote = _.find(document.votes, {user_id: mongoose.Types.ObjectId(req.session.passport.user)});
+                var vote = _.find(document.votes, {user_id: mongoose.Types.ObjectId(req.session.passport.user)}); // works. why?
 
                 if (vote) {
                     if ( vote.vote > 0) {

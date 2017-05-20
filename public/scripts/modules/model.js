@@ -23,7 +23,7 @@ var model = module.exports = {
             .end(function(err, response){
                 if(err) { console.log("error>>", err); } // remove
                 model.postData = response;
-                model.lastTime = new Date(response.body[response.body.length - 1].postedTime);
+                model.lastTime = new Date(response.body.documents[response.body.documents.length - 1].postedTime);
                 console.log(model.lastTime);
                 resolve(model.postData);
             });
