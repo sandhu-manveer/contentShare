@@ -30,11 +30,11 @@ var model = module.exports = {
         });
     },
 
-    upvotePost: function(postId) {
+    votePost: function(postId, type) {
         return new Promise(function(resolve, reject){
             request
-            .get('/api/upvote')
-            .query('postId='+ postId + '')
+            .get('/api/vote')
+            .query('postId='+ postId + '&type=' + type)
             .end(function(err, response){
                 model.voteResponse = response;
                 resolve(model.voteResponse);

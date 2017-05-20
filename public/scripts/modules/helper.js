@@ -22,8 +22,8 @@ var helper = module.exports = {
         return model.voteResponse;
     },
 
-    upvotePost: function(postId) {
-        return model.upvotePost(postId);
+    votePost: function(postId, type) {
+        return model.votePost(postId, type);
     }
 
 };

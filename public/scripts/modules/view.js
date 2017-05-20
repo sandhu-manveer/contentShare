@@ -13,17 +13,17 @@ var view = module.exports = {
 
     postHeaderTemplate: $.templates('<header class="maincontent-post-header"><h3>{{:title}}</h3><p>{{:author}}<p></header>'),
     
-    postDetailsTemplate: $.templates('<div class="maincontent-post-details">{{:upvote}} {{:downvote}} {{:votecount}} </div>'),
+    postDetailsTemplate: $.templates('<div class="maincontent-post-details">{{:buttons}} {{:votecount}}</div>'),
 
-    postUpvoteTemplate: $.templates('<div class="post-upvote"><span class="post-upvote-do{{:upVoted}}"></span></div>'),
+    postButtonsTemplate: $.templates('<div class="post-vote">{{:upvote}}{{:downvote}}</div>'),
 
-    postDownvoteTemplate: $.templates('<div class="post-downvote"><span class="post-downvote-do{{:downVoted}}"></span></div>'),
+    postUpvoteTemplate: $.templates('<span id="upVote" class="post-vote-do-up{{:upVoted}}"></span>'), // is it right to add id?
 
-    postcountTemplate: $.templates('<div class="vote-count"><span>{{:upvote_count}}</span></div>'),
+    postDownvoteTemplate: $.templates('<span id="downVote" class="post-vote-do-down{{:downVoted}}"></span>'),
+
+    postcountTemplate: $.templates('<div class="vote-count"><span class="post-votes">{{:upvote_count}}</span></div>'),
 
     isActive: false,
-
-    isUpVoted: false,
 
     setInfScroll: function() {
 
@@ -69,21 +69,27 @@ var view = module.exports = {
 
     renderPosts: function() {
         var posts = helper.getCurrentPostData();
+        var loggedIn = false;
+
+        if(posts.body.user) {
+            // does using a boolean provide any advantage?
+            loggedIn = true;
+        }
         
         // too slow?
         // iteration over all the votes, correct
-        if(posts.body.user) {
-            for (var i=0; i < posts.body.documents.length; i++) {
+        for (var i=0; i < posts.body.documents.length; i++) {
+            posts.body.documents[i].upVoted = '';
+            posts.body.documents[i].downVoted = '';
+            if(loggedIn) {
                 var vote = _.find(posts.body.documents[i].votes, {user_id: posts.body.user}); // works. why?
-                posts.body.documents[i].upVoted = '';
-                posts.body.documents[i].downVoted = '';
                 if (vote && vote.vote !== 0) {
-                    if ( vote.vote > 0) posts.body.documents[i].upVoted = 'on';
-                    else if ( vote.vote < 0 ) posts.body.documents[i].downVoted = 'on';
-                } 
-            }
+                    if ( vote.vote > 0) posts.body.documents[i].upVoted = ' on';
+                    else if ( vote.vote < 0 ) posts.body.documents[i].downVoted = ' on';
+                }
+            } 
         }
-        console.log(posts);
+        
         posts.body.documents.forEach(function(element, index, array){
             $('.maincontent-container').append(view.postTemplate.render({
 
@@ -96,14 +102,18 @@ var view = module.exports = {
 
                 media: view.postMediaTemplate.render({}),
                 details: view.postDetailsTemplate.render({
-                    upvote:view.postUpvoteTemplate.render({
-                        upVoted: ' ' + element.upVoted
-                    }),
-                    downvote:view.postDownvoteTemplate.render({
-                        downVoted: ' ' + element.downVoted
+                    buttons: view.postButtonsTemplate.render({
+                        upvote: view.postUpvoteTemplate.render({
+                            upVoted: element.upVoted
+                        }),
+                        downvote: view.postDownvoteTemplate.render({
+                            downVoted: element.downVoted
+                        })
                     }),
                     votecount:view.postcountTemplate.render({
-                        upvote_count:20
+                        upvote_count: element.votes.reduce(function(a, b) {
+                            return a + b.vote;  
+                        }, 0)
                     })
                 })
             }));
@@ -112,22 +122,34 @@ var view = module.exports = {
      },
 
     initToggle: function() {
-        $('[class^=post-upvote-do]').click(function() {
+        $('[class^=post-vote-do-]').click(function() {
+            var element = this;
+            var type = $(this).attr('id');
             var postId = $(this).parents('article').attr('post-id');
-            helper.upvotePost(postId)
+            helper.votePost(postId, type)
                 .then(function(res){
                     var response = helper.getVoteResponse();
-                    console.log(response);
                     if(!response.body.isLoggedIn) {
                         window.location.href = window.location.origin + '/login';
                     }
-                    $(this).toggleClass('on');
-                })
-                .catch(function(err){console.log(err);})
-        });
+                    $(element).parent().siblings('[class=vote-count]').children('[class=post-votes]').html(function(){
+                        
+                        var retVal = parseInt($(this).html())
+                        var clickedClass = $(element).attr('class');
+                        var otherClass = $(element).siblings().attr('class');
+                        if (clickedClass === 'post-vote-do-up' && otherClass === 'post-vote-do-down') retVal = retVal + response.body.vote;
+                        if (clickedClass === 'post-vote-do-down' && otherClass === 'post-vote-do-up') retVal = retVal + response.body.vote;
+                        if (clickedClass === 'post-vote-do-up on' && otherClass === 'post-vote-do-down') retVal = retVal - 1;
+                        if (clickedClass === 'post-vote-do-down on' && otherClass === 'post-vote-do-up') retVal = retVal + 1;  
+                        if (clickedClass === 'post-vote-do-up' && otherClass === 'post-vote-do-down on') retVal = retVal + 2;
+                        if (clickedClass === 'post-vote-do-down' && otherClass === 'post-vote-do-up on') retVal = retVal - 2;         
 
-        $('[class^=post-upvote-do]').click(function() {
-            $(this).toggleClass('on');
+                        return retVal.toString();
+                    });
+                    $(element).siblings().removeClass('on');
+                    $(element).toggleClass('on');
+                })
+                .catch(function(err){console.log(err);});
         });
     }
 };

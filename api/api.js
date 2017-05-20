@@ -115,7 +115,7 @@ router.route('/getPosts')
 /**
  * Route to upvote post
  */
-router.route('/upvote')
+router.route('/vote')
     .all(function(req, res, next){
         if (req.isAuthenticated()) {
             res.locals.user = req.user;
@@ -126,9 +126,11 @@ router.route('/upvote')
     })
     .get(function(req, res, next){
         
-        if(!req.query.postId) {
+        if(!req.query.postId || !req.query.type) {
             next();
         }
+
+        var type = req.query.type;
 
         var searchFilter = {
             _id: mongoose.Types.ObjectId(req.query.postId)
@@ -139,19 +141,32 @@ router.route('/upvote')
                 var vote = _.find(document.votes, {user_id: mongoose.Types.ObjectId(req.session.passport.user)}); // works. why?
 
                 if (vote) {
-                    if ( vote.vote > 0) {
-                        vote.vote = 0;
-                    } else {
-                        vote.vote = 1;
+                    //compare as string?
+                    if (type === 'upVote') {
+                        if (vote.vote > 0) {
+                            vote.vote = 0;
+                        } else {
+                            vote.vote = 1;
+                        }
+                    } else if (type === 'downVote') {
+                        if (vote.vote < 0) {
+                            vote.vote = 0;
+                        } else {
+                            vote.vote = -1;
+                        }
                     }
                 } else {
                     var vote = {};
                     vote.user_id = mongoose.Types.ObjectId(req.session.passport.user);
-                    vote.vote = 1;
-
+                    if (type === 'upVote') {
+                        vote.vote = 1;
+                    } else if (type === 'downVote') {
+                        vote.vote = -1;
+                    }
                     document.votes.push(vote);
                 }
                 document.save();
+                res.json({ isLoggedIn: true, vote: vote.vote });
             })
             .catch((err) => next(err));
     });
