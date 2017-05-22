@@ -24,7 +24,9 @@ router.route('/login')
                             });
                             return;
                     })
-                    .catch(next);
+                    .catch(() => {
+                        return res.redirect('/');
+                    });
             } else {
                 req.logIn(userId, function(err){
                     if(err) { return console.log(err); }

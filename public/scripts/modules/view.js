@@ -132,24 +132,26 @@ var view = module.exports = {
                     if(!response.body.isLoggedIn) {
                         window.location.href = window.location.origin + '/login';
                     }
-                    $(element).parent().siblings('[class=vote-count]').children('[class=post-votes]').html(function(){
-                        
-                        var retVal = parseInt($(this).html())
-                        var clickedClass = $(element).attr('class');
-                        var otherClass = $(element).siblings().attr('class');
-                        if (clickedClass === 'post-vote-do-up' && otherClass === 'post-vote-do-down') retVal = retVal + response.body.vote;
-                        if (clickedClass === 'post-vote-do-down' && otherClass === 'post-vote-do-up') retVal = retVal + response.body.vote;
-                        if (clickedClass === 'post-vote-do-up on' && otherClass === 'post-vote-do-down') retVal = retVal - 1;
-                        if (clickedClass === 'post-vote-do-down on' && otherClass === 'post-vote-do-up') retVal = retVal + 1;  
-                        if (clickedClass === 'post-vote-do-up' && otherClass === 'post-vote-do-down on') retVal = retVal + 2;
-                        if (clickedClass === 'post-vote-do-down' && otherClass === 'post-vote-do-up on') retVal = retVal - 2;         
-
-                        return retVal.toString();
-                    });
+                    view.setScore(element, response.body.vote);
                     $(element).siblings().removeClass('on');
                     $(element).toggleClass('on');
                 })
                 .catch(function(err){console.log(err);});
+        });
+    },
+
+    setScore: function(element, vote) {
+        $(element).parent().siblings('[class=vote-count]').children('[class=post-votes]').html(function(){             
+            var retVal = parseInt($(this).html())
+            var clickedClass = $(element).attr('class');
+            var otherClass = $(element).siblings().attr('class');
+            if (clickedClass === 'post-vote-do-up' && otherClass === 'post-vote-do-down') retVal = retVal + vote;
+            if (clickedClass === 'post-vote-do-down' && otherClass === 'post-vote-do-up') retVal = retVal + vote;
+            if (clickedClass === 'post-vote-do-up on' && otherClass === 'post-vote-do-down') retVal = retVal - 1;
+            if (clickedClass === 'post-vote-do-down on' && otherClass === 'post-vote-do-up') retVal = retVal + 1;  
+            if (clickedClass === 'post-vote-do-up' && otherClass === 'post-vote-do-down on') retVal = retVal + 2;
+            if (clickedClass === 'post-vote-do-down' && otherClass === 'post-vote-do-up on') retVal = retVal - 2;         
+            return retVal.toString();
         });
     }
 };

@@ -5,9 +5,19 @@ var appDB = require('./appDB');
 var User = appDB.User; 
 
 // save encrypted password
-var user = new User();
+var userObjects = [];
 
-userFromUsersJson(user, users[0]);
+for (var i=0; i < users.length; i++){
+    var user = new User();
+    userFromUsersJson(user, users[i]);
+    userObjects.push(user.save());
+}
+
+console.log(userObjects);
+
+Promise.all(userObjects)
+    .then(() => console.log('done'))
+    .catch((err) => console.log(err));
 
 function userFromUsersJson(user, jsonUser) {
   user.alias = jsonUser.alias;
@@ -37,7 +47,7 @@ function userFromUsersJson(user, jsonUser) {
     });*/
 
 // query and check password encryption
-User.findOne({ alias: 'user1' }, function(err, user) {
+/*User.findOne({ alias: 'user1' }, function(err, user) {
             if (err) throw err;
 
             // test a matching password
@@ -53,4 +63,4 @@ User.findOne({ alias: 'user1' }, function(err, user) {
                 console.log('123Password:', isMatch); // -&gt; 123Password: false
                 appDB.close();
             });
-        });
+        });*/
