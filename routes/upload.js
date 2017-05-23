@@ -14,5 +14,5 @@ router.use(function (req, res, next) {
 });
 
 router.get('/upload', function (req, res) {
-  res.render("upload", {title: "Something Else"});
+  res.render('upload', {message: req.flash()}); //HBS worked when json sent, dont stringify
 });

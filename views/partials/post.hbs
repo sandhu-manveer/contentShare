@@ -1,16 +1,19 @@
 <div class="post-form-container">
-  <div class="container">
-    <h2 align="center">New Post</h2>
-    <form class="form-horizontal" action="/api/uploadPost" method="POST">
-        <div class="form-group">
-            <label class="control-label col-xs-3" for="title">Post Title:</label>
-            <div class="col-xs-7">
-                <input type="title" class="form-control" id="title" placeholder="Title" name="title">
+    <div class="container">
+        {{#if message.error}}
+        <div class="alert alert-danger">{{{message.error}}}</div>
+        {{/if}}
+        <h2 align="center">New Post</h2>
+        <form class="form-horizontal" action="/api/uploadPost" method="POST">
+            <div class="form-group">
+                <label class="control-label col-xs-3" for="title">Post Title:</label>
+                <div class="col-xs-7">
+                    <input type="title" class="form-control" id="title" placeholder="Title" name="title">
+                </div>
             </div>
-        </div>
-        <div class="form-group text-center">
-            <button type="submit" class="btn btn-default">Submit</button>
-        </div>
-    </form>
-  </div>
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-default">Submit</button>
+            </div>
+        </form>
+    </div>
 </div>

@@ -131,10 +131,11 @@ var view = module.exports = {
                     var response = helper.getVoteResponse();
                     if(!response.body.isLoggedIn) {
                         window.location.href = window.location.origin + '/login';
+                    } else {
+                        view.setScore(element, response.body.vote);
+                        $(element).siblings().removeClass('on');
+                        $(element).toggleClass('on');
                     }
-                    view.setScore(element, response.body.vote);
-                    $(element).siblings().removeClass('on');
-                    $(element).toggleClass('on');
                 })
                 .catch(function(err){console.log(err);});
         });

@@ -2,6 +2,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var hbs = require('express-hbs');
 var passport = require('passport');
+var flash = require('connect-flash');
+var cookieParser = require('cookie-parser');
 require('./routes/auth/passport-init');
 
 var app = express();
@@ -23,10 +25,17 @@ app.set('views', __dirname + '/views');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
+//cookie parser setup
+app.use(cookieParser('secret'));
 // express-session for session based auth
 app.use(require('express-session')({
-  secret: 'some random secret', resave: false, saveUninitialized: false
+  secret: 'some random secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {maxAge: 60000}
 }));
+// flash setup (requires session, cookieparser)
+app.use(flash());
 // passport setup
 app.use(passport.initialize());
 app.use(passport.session());
