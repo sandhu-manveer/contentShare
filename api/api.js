@@ -44,9 +44,16 @@ router.route('/uploadPost')
         createPostFromRequestObj(post, req);
         
         post.save()
-            .then(() => {
-                res.status(200);
-                res.redirect('/');
+            .then((result) => {
+                // save post id in user document
+                User.update({'_id': res.locals.user._id}, {
+                    $push: { 'posts': result._id }
+                }).exec()
+                    .then(() => {
+                        res.status(200);
+                        res.redirect('/');
+                    })
+                    .catch(next);
             })  
             .catch((error) => {
                 console.log(error);
@@ -165,8 +172,42 @@ router.route('/vote')
                     }
                     document.votes.push(vote);
                 }
-                document.save();
-                res.json({ isLoggedIn: true, vote: vote.vote });
+                document.save()
+                    .then(() => res.json({ isLoggedIn: true, vote: vote.vote }))
+                    .catch(next);
             })
             .catch((err) => next(err));
+    });
+
+/**
+ * Route to delete post from mongoDB
+ * 
+ */
+router.route('/deletePost/:postId')
+    .all(function(req, res, next){
+        checkAuth(req, res, next);
+    })
+    .get(function(req, res, next){
+        if (!req.params.postId) {
+            res.sendStatus(500);
+            return;
+        }
+
+        User.findOne( {'_id': res.locals.user._id}).exec()
+            .then((user) => {
+                var post = _.find(user.posts, mongoose.Types.ObjectId(req.params.postId));
+                if(!post) res.sendStatus(404);
+                Post.remove({'_id': post})
+                    .then(() => {
+                        user.posts = user.posts.filter(pId => pId.toString() !== req.params.postId);
+                        user.update({$set: {posts: user.posts}})
+                            .then(() => {
+                                res.status(200);
+                                res.redirect('/');
+                            })
+                            .catch(next);
+                    })
+                    .catch(err => next(err));
+            })
+            .catch(err => next(err));
     });

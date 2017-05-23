@@ -12,9 +12,6 @@ var model = module.exports = {
 
     voteResponse: {},
 
-    /**
-     * @param Date() lastTime
-     */
     getPostData: function() {
         return new Promise(function(resolve, reject){
             request

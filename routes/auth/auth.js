@@ -12,7 +12,7 @@ router.route('/login')
         // dev autologin
         // remove and check everything is working
         if(req.app.get('env') === 'development') {
-            var userId = {_id:'5912994c0b2fd617a42811df'};
+            var userId = {_id:'5923da6233d7621f4c703f67'};
 
             if(req.query.user) {
                 User.findOne({alias: req.query.user}).exec()
@@ -43,10 +43,6 @@ router.route('/login')
             successRedirect: '/',
             failureRedirect: '/login'
         }));
-
-        // .post(function(req, res){
-        //     console.log(req);
-        // });
 
 router.get('/logout', function(req, res){
     req.logout();

@@ -8,7 +8,8 @@ var schemaOptions = {
 
 var schema = new mongoose.Schema({
     alias: {type: String, required: true, minlength: 2},
-    password: {type: String, required: true}
+    password: {type: String, required: true},
+    posts: [ { type: mongoose.Schema.Types.ObjectId, ref: 'post' } ]
 }, schemaOptions);
 
 // middleware to ensure passwords are hashed
