@@ -1,5 +1,8 @@
 <div class="login-container">
     <div class="container">
+        {{#if message.error}}
+        <div id="login-error" class="alert alert-danger">{{{message.error}}}</div>
+        {{/if}}
         <div class="main-content row">
         <div class="col-md-4 col-md-offset-4">
             <form action="/login" method="post">

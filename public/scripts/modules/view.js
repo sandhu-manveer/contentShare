@@ -7,6 +7,8 @@ var view = module.exports = {
         view.fetchAndRender();
     },
 
+    // html templates to build maincontent posts
+
     postTemplate: $.templates('<article class="maincontent-post" post-id="{{:postId}}">{{:header}} {{:media}} {{:details}}</article>'),
 
     postMediaTemplate: $.templates('<figure class="maincontent-post-media"></figure>'),
@@ -23,8 +25,12 @@ var view = module.exports = {
 
     postcountTemplate: $.templates('<div class="vote-count"><span class="post-votes">{{:upvote_count}}</span></div>'),
 
+    // flag to check if req to server is active
     isActive: false,
 
+    /**
+     * Initialize infinite scroll
+     */
     setInfScroll: function() {
 
         this.initialize = function() {
@@ -56,6 +62,9 @@ var view = module.exports = {
         this.initialize();
     },
 
+    /**
+     * fetch posts from server and render
+     */
     fetchAndRender: function() {
         helper.getPostData()
             .then(function(res){
@@ -67,6 +76,10 @@ var view = module.exports = {
             .catch(function(err){console.log(err);});
     },
 
+    /**
+     * function to render posts
+     * checks login status and accordingly displays up/down votes and score
+     */
     renderPosts: function() {
         var posts = helper.getCurrentPostData();
         var loggedIn = false;
@@ -119,8 +132,11 @@ var view = module.exports = {
             }));
         });
         view.isActive = false;
-     },
+     }, 
 
+    /**
+     * Function to attach click listeners on up/down vote sprites
+     */
     initToggle: function() {
         $('[class^=post-vote-do-]').click(function() {
             var element = this;
@@ -141,6 +157,12 @@ var view = module.exports = {
         });
     },
 
+    /**
+     * Display change in score based on up/down vote
+     * 
+     * @param {document} element the html dom contianing post meta
+     * @param {String} vote up/down vote, obtained from post id
+     */
     setScore: function(element, vote) {
         $(element).parent().siblings('[class=vote-count]').children('[class=post-votes]').html(function(){             
             var retVal = parseInt($(this).html())

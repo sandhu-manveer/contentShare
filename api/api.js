@@ -11,7 +11,6 @@ module.exports = router;
 
 /**
  * middleware function to check authentication
- * set for all routes?
  * 
  * @param {*} req 
  * @param {*} res 
@@ -186,7 +185,7 @@ router.route('/vote')
     });
 
 /**
- * Route to delete post from mongoDB
+ * Route to delete post from mongo
  * 
  */
 router.route('/deletePost/:postId')

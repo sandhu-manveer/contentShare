@@ -34,14 +34,15 @@ router.route('/login')
                 });
                 return; 
             }
-        } 
+        }
     })
     .get(function(req, res, next){
-            res.render('auth');
+            res.render('auth', {message: req.flash()});
         })
     .post(passport.authenticate('local', {
             successRedirect: '/',
-            failureRedirect: '/login'
+            failureRedirect: '/login',
+            failureFlash : true
         }));
 
 router.get('/logout', function(req, res){

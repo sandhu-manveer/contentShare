@@ -1,5 +1,8 @@
 var request = require('superagent');
 
+/**
+ * Functions for making calls to app services
+ */
 var model = module.exports = {
     init: function(){
        console.log('Model Init');
@@ -12,6 +15,9 @@ var model = module.exports = {
 
     voteResponse: {},
 
+    /**
+     * get get posts from server
+     */
     getPostData: function() {
         return new Promise(function(resolve, reject){
             request
@@ -27,6 +33,12 @@ var model = module.exports = {
         });
     },
 
+    /**
+     * up/down vote post request to server
+     * 
+     * @param {String} postId mongo object id of post
+     * @param {String} type up or down vote
+     */
     votePost: function(postId, type) {
         return new Promise(function(resolve, reject){
             request

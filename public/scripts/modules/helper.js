@@ -1,5 +1,8 @@
 var model = require('./model.js');
 
+/**
+ * Accessor methods for model.js
+ */
 var helper = module.exports = {
 
     getCurrentPostData: function() {

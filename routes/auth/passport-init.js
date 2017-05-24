@@ -11,14 +11,14 @@ passport.use(new localStrategy(function(alias, password, done){
     User.findOne({ alias: alias}).exec()
         .then(user => {
             if(!user) {   
-                done(null, user);
+                done(null, user, {message: 'Incorrect Username or Password'});
                 return;
             }
 
             user.comparePassword(password, function(err, isMatch) {
                 if (err) throw err;
                 if (!isMatch){
-                    done(null, false);
+                    done(null, false, {message: 'Incorrect Username or Password'});
                     return;
                 } else {
                     done(null, user);
