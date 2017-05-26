@@ -12,7 +12,8 @@ var app = express();
 app.use(express.static(__dirname + '/dist'));
 app.use(express.static(__dirname + '/node_modules/jquery/dist'));
 app.use(express.static(__dirname + '/node_modules/bootstrap/dist'));
-app.use(express.static(__dirname + '/node_modules/jsrender'))
+app.use(express.static(__dirname + '/node_modules/jsrender'));
+app.use(express.static(__dirname + '/node_modules/jquery-form-validator/form-validator'));
 
 // handlebars setup
 app.engine('hbs', hbs.express3({

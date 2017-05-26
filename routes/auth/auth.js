@@ -11,7 +11,7 @@ router.route('/login')
     .all(function(req, res, next){
         // dev autologin
         // remove and check everything is working
-        if(req.app.get('env') === 'development') {
+        /*if(req.app.get('env') === 'development') {
             var userId = {_id:'5923da6233d7621f4c703f67'};
 
             if(req.query.user) {
@@ -34,14 +34,25 @@ router.route('/login')
                 });
                 return; 
             }
-        }
+        }*/
+        next();
     })
     .get(function(req, res, next){
             res.render('auth', {message: req.flash()});
         })
-    .post(passport.authenticate('local', {
+    .post(passport.authenticate('local-login', {
             successRedirect: '/',
             failureRedirect: '/login',
+            failureFlash : true
+        }));
+
+router.route('/signup')
+    .get(function(req, res, next){
+            res.render('signup', {message: req.flash()});
+        })
+    .post(passport.authenticate('local-signup', {
+            successRedirect: '/login',
+            failureRedirect: '/signup',
             failureFlash : true
         }));
 

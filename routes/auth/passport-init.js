@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var appDB = require('../../data/appDB');
 var User = appDB.User;
 
-passport.use(new localStrategy(function(alias, password, done){
+passport.use('local-login', new localStrategy(function(alias, password, done){
     // var user = _.find(users, u => u.alias === alias);
 
     User.findOne({ alias: alias}).exec()
@@ -33,6 +33,47 @@ passport.use(new localStrategy(function(alias, password, done){
         .catch(error => console.log(error));
 }));
 
+passport.use('local-signup', new localStrategy({
+    passReqToCallback: true
+},
+function(req, alias, password, done){
+
+    var email = req.body.email;
+
+    if(!validateEmail(email)){
+        done(null, false, {message: 'Enter Valid Email'});
+    }
+
+    if(alias.length < 2){
+        done(null, false, {message: 'Username must contain more than 2 characters'});
+    }
+
+    User.findOne({ alias: alias}).exec()
+        .then(user => {
+            if(user) {   
+                done(null, false, {message: 'Username already exists'});
+                return;
+            } else {
+                var newUser = new User();
+
+                createUserDocument(newUser, {
+                    alias: alias,
+                    email: email,
+                    password: password
+                });
+
+                newUser.save()
+                    .then(() => {
+                        done(null, newUser);
+                    })
+                    .catch(err => {
+                        throw err;
+                    });
+            }
+        })
+        .catch(error => console.log(error));
+}));
+
 passport.serializeUser(function(user, done){
     done(null, user._id);
 });
@@ -43,3 +84,15 @@ passport.deserializeUser(function(id, done){
         .then(user => done(null, user))
         .catch(error => console.log(error));
 });
+
+function validateEmail(email) {
+   var emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+   return emailRegex.test(email);
+}
+
+// required?
+function createUserDocument(user, jsonUser) {
+  user.alias = jsonUser.alias;
+  user.password = jsonUser.password;
+  user.email = jsonUser.email;
+}

@@ -10,6 +10,7 @@ var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var nodemon = require('gulp-nodemon');
+var es = require('event-stream');
 
 gulp.task('images', function() {
     gulp.src(['public/img/**/*'])
@@ -18,20 +19,28 @@ gulp.task('images', function() {
         .pipe(browserSync.stream());
 });
 
+// create multiple bundles or just one?
 gulp.task('scripts', function(){
-    var b = browserify({
-        entries: 'public/scripts/main.js',
-        debug: true
-    });
 
-    b.bundle()
-        .pipe(source('main.js'))
-        .pipe(buffer())
-        .pipe(sourceMaps.init({loadMaps: true}))
-        .pipe(uglify())
-        .pipe(sourceMaps.write('./'))
-        .pipe(gulp.dest('dist/scripts/'))
-        .pipe(browserSync.stream());
+    // files to be bundled
+    var files = ['public/scripts/main.js', 'public/scripts/validator.js'];
+
+    var tasks = files.map(file => {
+        return browserify({
+            entries: [file],
+            debug: true
+        })
+        .bundle()
+            .pipe(source(file.split('/').slice(-1).pop()))
+            .pipe(buffer())
+            .pipe(sourceMaps.init({loadMaps: true}))
+            .pipe(uglify())
+            .pipe(sourceMaps.write('./'))
+            .pipe(gulp.dest('dist/scripts/'))
+            .pipe(browserSync.stream());
+    });
+    // merge multiple streams (each creates a bundle)
+    return es.merge.apply(null, tasks);
 });
 
 gulp.task('styles', function(){

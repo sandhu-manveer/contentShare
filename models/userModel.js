@@ -8,7 +8,9 @@ var schemaOptions = {
 
 var schema = new mongoose.Schema({
     alias: {type: String, required: true, minlength: 2},
+    email: {type: String, required: true, minlength: 2},
     password: {type: String, required: true},
+    postsVoted: [ mongoose.Schema.Types.ObjectId ],
     posts: [ { type: mongoose.Schema.Types.ObjectId, ref: 'post' } ]
 }, schemaOptions);
 

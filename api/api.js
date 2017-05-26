@@ -51,9 +51,8 @@ router.route('/uploadPost')
         post.save()
             .then((result) => {
                 // save post id in user document
-                User.update({ '_id': res.locals.user._id }, {
-                    $push: { 'posts': result._id }
-                }).exec()
+                User.update({ '_id': res.locals.user._id },
+                { $push: { 'posts': result._id } }).exec()
                     .then(() => {
                         res.status(200);
                         res.redirect('/');
@@ -178,7 +177,16 @@ router.route('/vote')
                     document.votes.push(vote);
                 }
                 document.save()
-                    .then(() => res.json({ isLoggedIn: true, vote: vote.vote }))
+                    .then(() => {
+                        // add post to user doc (postsVoted)
+                        User.update({ _id: mongoose.Types.ObjectId(req.session.passport.user)},
+                        {$addToSet: { postsVoted : document._id }}).exec()
+                            .then(() => {
+                                res.status(200);
+                                res.json({ isLoggedIn: true, vote: vote.vote })
+                            })
+                            .catch(next);
+                    })
                     .catch(next);
             })
             .catch((err) => next(err));
