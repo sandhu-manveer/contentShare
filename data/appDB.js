@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
-var url = 'mongodb://localhost:27017/appDB';
+var url = process.env.MONGODB_URL;
 var connectMongoose = mongoose.connect(url);
 
 var User = require('../models/userModel.js');
@@ -13,5 +13,6 @@ module.exports = {
     Post,
     close: function(callback) {
         connectMongoose.disconnect();
+        callback();
     }
 };

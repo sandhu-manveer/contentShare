@@ -1,3 +1,4 @@
+require('dotenv').config(); // Split into prod, dev envs
 var express = require('express');
 var bodyParser = require('body-parser');
 var hbs = require('express-hbs');
@@ -45,20 +46,23 @@ app.use(passport.session());
 var authRouter = require("./routes/auth/auth");
 app.use(authRouter);
 
-// check if user signed in
-app.use(function (req, res, next) {
-  if (req.isAuthenticated()) {
-    res.locals.user = req.user;
-    next();
-    return;
-  }
-  next();
-});
+// does not need auth
+var postPageRouter = require("./routes/post");
+app.use(postPageRouter);
 
 var apiRouter = require("./api/api");
 app.use("/api", apiRouter);
 
-app.get('/', function (req, res) {
+function checkAuth(req, res, next) {
+    if (req.isAuthenticated()) {
+        res.locals.user = req.user;
+        next();
+        return;
+    }
+    next();
+}
+
+app.get('/', checkAuth, function (req, res) {
   res.render("index", {user: res.locals.user});
 });
 
@@ -78,14 +82,27 @@ app.get('/page3', function (req, res) {
 var uploadRouter = require("./routes/upload");
 app.use(uploadRouter);
 
-app.listen(3000, function () {
-  console.log('App listening on port 3000');
+var server = app.listen(process.env.APP_PORT, function () {
+  console.log('App listening on port ' + process.env.APP_PORT);
 });
 
-process.on('SIGINT', function(){
-  console.log('SIGINT');
+var gracefulShutdown = function() {
+  console.log("Received kill signal, shutting down gracefully.");
+
   var appDB = require('./data/appDB');
-  appDB.close(function() {
-      process.exit(0);
+  appDB.close(() => {
+    console.log('Mongo connection closed')
+    server.close(() => {
+      console.log("Closed out remaining connections.");
+      process.exit();
+    });
   });
-});
+   // if after
+   setTimeout(function() {
+       console.error("Could not close connections in time, forcefully shutting down");
+       process.exit();
+  }, 10*1000);
+}
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);

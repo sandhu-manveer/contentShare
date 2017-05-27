@@ -137,7 +137,7 @@ router.route('/vote')
     })
     .get(function (req, res, next) {
 
-        if (!req.query.postId || !req.query.type) {
+        if (!req.query.postId || !req.query.type || !mongoose.Types.ObjectId.isValid(req.query.postId)) {
             next();
         }
 
@@ -201,7 +201,7 @@ router.route('/deletePost/:postId')
         checkAuth(req, res, next);
     })
     .get(function (req, res, next) {
-        if (!req.params.postId) {
+        if (!req.params.postId || !mongoose.Types.ObjectId.isValid(req.params.postId)) {
             res.sendStatus(500);
             return;
         }
@@ -221,6 +221,28 @@ router.route('/deletePost/:postId')
                             .catch(next);
                     })
                     .catch(err => next(err));
+            })
+            .catch(err => next(err));
+    });
+
+/**
+ * Route to get Single post by id
+ * 
+ */
+router.route('/getSinglePost/:postId')
+    .all(function (req, res, next) {
+        next();
+    })
+    .get(function (req, res, next) {
+        if (!req.params.postId) {
+            res.sendStatus(500);
+            return;
+        }
+
+        Post.findOne({ '_id': req.params.postId }).lean().exec()
+            .then((post) => {
+                if (!post) res.sendStatus(404);
+                res.send(post);
             })
             .catch(err => next(err));
     });
