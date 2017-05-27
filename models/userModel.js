@@ -3,7 +3,7 @@ var bcrypt = require('bcrypt');
 var SALT_WORK_FACTOR = 10; // bcrypt 
 
 var schemaOptions = { 
-    collection: 'users'
+    collection: 'user'
 };
 
 var schema = new mongoose.Schema({
@@ -11,7 +11,8 @@ var schema = new mongoose.Schema({
     email: {type: String, required: true, minlength: 2},
     password: {type: String, required: true},
     postsVoted: [ mongoose.Schema.Types.ObjectId ],
-    posts: [ { type: mongoose.Schema.Types.ObjectId, ref: 'post' } ]
+    posts: [ { type: mongoose.Schema.Types.ObjectId, ref: 'post' } ],
+    dateCreated: { type: Date, default: Date.now }
 }, schemaOptions);
 
 // middleware to ensure passwords are hashed

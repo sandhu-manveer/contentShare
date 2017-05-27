@@ -81,3 +81,11 @@ app.use(uploadRouter);
 app.listen(3000, function () {
   console.log('App listening on port 3000');
 });
+
+process.on('SIGINT', function(){
+  console.log('SIGINT');
+  var appDB = require('./data/appDB');
+  appDB.close(function() {
+      process.exit(0);
+  });
+});

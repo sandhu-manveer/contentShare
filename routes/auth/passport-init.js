@@ -5,13 +5,13 @@ var mongoose = require('mongoose');
 var appDB = require('../../data/appDB');
 var User = appDB.User;
 
-passport.use('local-login', new localStrategy(function(alias, password, done){
+passport.use('local-login', new localStrategy(function(email, password, done){
     // var user = _.find(users, u => u.alias === alias);
 
-    User.findOne({ alias: alias}).exec()
+    User.findOne({ email: email}).exec()
         .then(user => {
             if(!user) {   
-                done(null, user, {message: 'Incorrect Username or Password'});
+                done(null, user, {message: 'Incorrect Email or Password'});
                 return;
             }
 
@@ -36,22 +36,18 @@ passport.use('local-login', new localStrategy(function(alias, password, done){
 passport.use('local-signup', new localStrategy({
     passReqToCallback: true
 },
-function(req, alias, password, done){
+function(req, email, password, done){
 
-    var email = req.body.email;
+    var alias = req.body.alias;
 
     if(!validateEmail(email)){
         done(null, false, {message: 'Enter Valid Email'});
     }
 
-    if(alias.length < 2){
-        done(null, false, {message: 'Username must contain more than 2 characters'});
-    }
-
-    User.findOne({ alias: alias}).exec()
+    User.findOne({ email: email}).exec()
         .then(user => {
             if(user) {   
-                done(null, false, {message: 'Username already exists'});
+                done(null, false, {message: 'Email already registered'});
                 return;
             } else {
                 var newUser = new User();

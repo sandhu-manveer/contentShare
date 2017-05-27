@@ -1,4 +1,4 @@
-// cli tool to check db
+// cli tool to add users to db
 
 var users = require(__dirname + '/users.json');
 var appDB = require('./appDB');
@@ -16,12 +16,16 @@ for (var i=0; i < users.length; i++){
 console.log(userObjects);
 
 Promise.all(userObjects)
-    .then(() => console.log('done'))
+    .then(() => {
+        appDB.close();
+        console.log('done')
+    })
     .catch((err) => console.log(err));
 
 function userFromUsersJson(user, jsonUser) {
   user.alias = jsonUser.alias;
   user.password = jsonUser.password;
+  user.email = jsonUser.email;
 }
 
 // save
