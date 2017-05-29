@@ -1,5 +1,7 @@
 var passport = require('passport');
 var localStrategy = require('passport-local').Strategy;
+var GoogleStrategy = require('passport-google-oauth2').Strategy;
+var config = require('./oauth.js');
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var appDB = require('../../data/appDB');
@@ -15,10 +17,10 @@ passport.use('local-login', new localStrategy(function(email, password, done){
                 return;
             }
 
-            user.comparePassword(password, function(err, isMatch) {
+            user.comparePassword(password, function (err, isMatch) {
                 if (err) throw err;
-                if (!isMatch){
-                    done(null, false, {message: 'Incorrect Username or Password'});
+                if (!isMatch) {
+                    done(null, false, { message: 'Incorrect Username or Password' });
                     return;
                 } else {
                     done(null, user);
@@ -26,7 +28,7 @@ passport.use('local-login', new localStrategy(function(email, password, done){
                 }
             });
 
-        
+
             // done(null, user); removing this prevented cant set headers err. why? ref:http://stackoverflow.com/questions/25550249/node-js-passport-error-cant-set-headers-after-they-are-sent-at-serverrespon
             // because async exec, this done is called before the function above finishes exec
         })
@@ -43,6 +45,8 @@ function(req, email, password, done){
     if(!validateEmail(email)){
         done(null, false, {message: 'Enter Valid Email'});
     }
+
+    email = email.toLowerCase(); 
 
     User.findOne({ email: email}).exec()
         .then(user => {
@@ -70,11 +74,41 @@ function(req, email, password, done){
         .catch(error => console.log(error));
 }));
 
-passport.serializeUser(function(user, done){
+passport.use('google', new GoogleStrategy({
+    clientID: config.google.clientID,
+    clientSecret: config.google.clientSecret,
+    callbackURL: config.google.callbackURL
+},
+    function (request, accessToken, refreshToken, profile, done) {
+        profile.email=profile.email.toLowerCase();
+        User.findOne({ email: profile.email }, function (err, user) {
+            if (err) {
+                console.log(err);  // handle errors!
+            }
+            if (!err && user !== null) {
+                done(null, user);
+            } else {
+                user = new User({
+                    password: profile.id,
+                    alias: profile.displayName,
+                    email:profile.email
+                });
+                            user.save()
+                                .then(() => {
+                                    console.log("saving user ...");
+                                    done(null, user);
+                                })
+                                .catch(error => console.log(error));
+            }
+        });
+    }
+));
+
+passport.serializeUser(function (user, done) {
     done(null, user._id);
 });
 
-passport.deserializeUser(function(id, done){
+passport.deserializeUser(function (id, done) {
     //done(null, user);
     User.findById(id).exec()
         .then(user => done(null, user))

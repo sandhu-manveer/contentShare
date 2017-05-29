@@ -1,5 +1,5 @@
 // cli tool to check db
-
+require('dotenv').config(); 
 var posts = require(__dirname + '/posts.json');
 var appDB = require('./appDB');
 var Post = appDB.Post; 

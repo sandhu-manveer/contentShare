@@ -5,3 +5,4 @@ dist
 /data/posts.json
 .vscode
 .env
+oauth.js
