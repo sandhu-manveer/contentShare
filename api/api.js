@@ -5,6 +5,7 @@ var _ = require('lodash');
 var appDB = require('../data/appDB');
 var Post = appDB.Post;
 var User = appDB.User;
+var Comment = appDB.Comment;
 
 var router = express.Router();
 module.exports = router;
@@ -76,6 +77,7 @@ function createPostFromRequestObj(post, request) {
     post.postedBy = mongoose.Types.ObjectId(request.session.passport.user);
 }
 
+// TODO: do not fetch comments when getting posts for front page
 /**
  * Route to get posts
  */
@@ -231,6 +233,7 @@ router.route('/deletePost/:postId')
  */
 router.route('/getSinglePost/:postId')
     .all(function (req, res, next) {
+        res.locals.postId = req.params.postId;
         next();
     })
     .get(function (req, res, next) {
@@ -246,3 +249,79 @@ router.route('/getSinglePost/:postId')
             })
             .catch(err => next(err));
     });
+
+/**
+ * Route to post comment
+ * 
+ * returns created comment id
+ */
+router.route('/postComment')
+    .all(function (req, res, next) {
+        //checkAuth(req, res, next); // removed for testing
+        next();
+    })
+    .post(function (req, res, next) {
+        // var user_id = res.locals.user._id;
+        var user_id = req.body.user_id; // change after testing (checkAuth)
+        var post_id = req.body.post_id;
+        if(req.body.parent_id === ""){
+            var parent_id = null;
+        } else if(!mongoose.Types.ObjectId.isValid(req.body.parent_id)) {
+            res.sendStatus(404);
+            return;
+        } else {
+            var parent_id = mongoose.Types.ObjectId(req.body.parent_id);
+        }
+        
+        var commentModel = new Comment();
+
+        createCommentFromRequestObj(commentModel, req);
+
+        Post.findOne({ '_id': post_id}).exec()
+            .then((post) => {
+                // Too slow? review approach
+                var newComments = post.comments;
+                addCommentToPost(newComments, commentModel, parent_id);
+                post.comments = newComments;
+                post.save()
+                    .then(() => {
+                        res.redirect(req.originalUrl);
+                    })
+                    .catch(err => next(err));
+            })
+            .catch(err => next(err));
+    });
+
+/**
+ * Helper function to create mongoose comment document
+ * 
+ * @param {Comment} comment 
+ * @param {Req} request 
+ */
+function createCommentFromRequestObj(commentModel, request) {
+    commentModel.text = request.body.text;
+    commentModel.user_id = mongoose.Types.ObjectId(request.body.user_id); // change to res.locals.user
+}
+
+/**
+ * Helper function to find parent comment
+ */
+function addCommentToPost(comments, comment, parent_id) {
+
+    // initial comment
+    if(!parent_id) {
+        comments.push(comment);
+        return;
+    }
+
+    for (var i = 0; i <  comments.length; i++) {
+        child = comments[i];
+        if (child._id.toString() === parent_id.toString()) {
+            child.comments.push(comment);
+            return;
+        }
+        if (child.comments) {
+             addCommentToPost(child.comments, comment, parent_id);
+        }
+    }
+}
