@@ -14,25 +14,25 @@ router.route('/login')
         /*if(req.app.get('env') === 'development') {
             var userId = {_id:'5923da6233d7621f4c703f67'};
 
-            if(req.query.user) {
-                User.findOne({alias: req.query.user}).exec()
+            if (req.query.user) {
+                User.findOne({ alias: req.query.user }).exec()
                     .then((response) => {
                         userId = response;
-                        req.logIn(userId, function(err){
-                            if(err) { return console.log(err); }
-                                return res.redirect('/');
-                            });
-                            return;
+                        req.logIn(userId, function (err) {
+                            if (err) { return console.log(err); }
+                            return res.redirect('/');
+                        });
+                        return;
                     })
                     .catch(() => {
                         return res.redirect('/');
                     });
             } else {
-                req.logIn(userId, function(err){
-                    if(err) { return console.log(err); }
+                req.logIn(userId, function (err) {
+                    if (err) { return console.log(err); }
                     return res.redirect('/');
                 });
-                return; 
+                return;
             }
         }*/
         next();
@@ -56,7 +56,20 @@ router.route('/signup')
             failureFlash : true
         }));
 
-router.get('/logout', function(req, res){
+router.get('/auth/google',
+  passport.authenticate('google', { scope: [
+    'https://www.googleapis.com/auth/plus.login',
+    'https://www.googleapis.com/auth/userinfo.email'
+  ] }
+));
+
+router.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.redirect('/');
+  });
+
+router.get('/logout', function (req, res) {
     req.logout();
-    res.redirect('/login'); 
+    res.redirect('/login');
 });

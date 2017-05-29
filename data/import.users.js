@@ -1,5 +1,5 @@
 // cli tool to add users to db
-
+require('dotenv').config(); // Split into prod, dev envs
 var users = require(__dirname + '/users.json');
 var appDB = require('./appDB');
 var User = appDB.User; 
