@@ -23,7 +23,7 @@ gulp.task('images', function() {
 gulp.task('scripts', function(){
 
     // files to be bundled
-    var files = ['public/scripts/main.js', 'public/scripts/validator.js'];
+    var files = ['public/scripts/main.js', 'public/scripts/validator.js', 'public/scripts/postPage.js'];
 
     var tasks = files.map(file => {
         return browserify({
@@ -36,11 +36,11 @@ gulp.task('scripts', function(){
             .pipe(sourceMaps.init({loadMaps: true}))
             .pipe(uglify())
             .pipe(sourceMaps.write('./'))
-            .pipe(gulp.dest('dist/scripts/'))
-            .pipe(browserSync.stream());
+            .pipe(gulp.dest('dist/scripts/'));
     });
     // merge multiple streams (each creates a bundle)
-    return es.merge.apply(null, tasks);
+    return es.merge(tasks)
+            .on('end', () => browserSync.reload());
 });
 
 gulp.task('styles', function(){

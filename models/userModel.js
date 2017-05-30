@@ -12,6 +12,7 @@ var schema = new mongoose.Schema({
     password: {type: String, required: true},
     postsVoted: [ mongoose.Schema.Types.ObjectId ],
     posts: [ { type: mongoose.Schema.Types.ObjectId, ref: 'post' } ],
+    comments: [ { post_id: {type: mongoose.Schema.Types.ObjectId, required: true}, comment_id: {type: mongoose.Schema.Types.ObjectId, required: true} } ],
     dateCreated: { type: Date, default: Date.now }
 }, schemaOptions);
 

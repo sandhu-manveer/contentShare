@@ -1,13 +1,12 @@
-var helper = require('./helper.js');
+var helper = require('./postHelper.js');
 var _ = require('lodash');
 
 var view = module.exports = {
     init: function(){
-        view.setInfScroll();
         view.fetchAndRender();
     },
 
-    // html templates to build maincontent posts
+    // html templates to build maincontent post
 
     postTemplate: $.templates('<article class="maincontent-post" post-id="{{:postId}}">{{:header}} {{:media}} {{:details}}</article>'),
 
@@ -29,109 +28,73 @@ var view = module.exports = {
     isActive: false,
 
     /**
-     * Initialize infinite scroll
-     */
-    setInfScroll: function() {
-
-        this.initialize = function() {
-            this.setupEvents();
-        };
-
-        this.setupEvents = function() {
-            $(window).on(
-                'scroll',
-                this.handleScroll.bind(this)
-            );
-        };
-
-
-        this.handleScroll = function() {
-            $(document).ready(function() {
-                var scrollTop = $(document).scrollTop();
-                var windowHeight = $(window).height();
-
-                // end of page reached
-                if (!view.isActive && $(document).height() - windowHeight == scrollTop) {
-                    view.isActive = true;
-                    $('#loading').show();
-                    view.fetchAndRender();
-                }
-            });
-        }
-
-        this.initialize();
-    },
-
-    /**
-     * fetch posts from server and render
+     * fetch post from server and render
      */
     fetchAndRender: function() {
-        helper.getPostData()
+        var postId = $('meta[name=postId]').attr("content");
+        helper.getPostData(postId)
             .then(function(res){
-                    view.renderPosts();
+                    view.renderPost();
                     $('#loading').hide();
                     // initialize click listeners after fetch
-                    view.initToggle();    
+                    view.initToggle();
             })
             .catch(function(err){console.log(err);});
     },
 
     /**
-     * function to render posts
+     * function to render post
      * checks login status and accordingly displays up/down votes and score
      */
-    renderPosts: function() {
-        var posts = helper.getCurrentPostData();
+    renderPost: function() {
+        console.log('renderPost')
+        var post = helper.getCurrentPostData();
         var loggedIn = false;
 
-        if(posts.body.user) {
+        if(post.body.user) {
             // does using a boolean provide any advantage?
             loggedIn = true;
         }
         
         // too slow?
         // iteration over all the votes, correct
-        for (var i=0; i < posts.body.documents.length; i++) {
-            posts.body.documents[i].upVoted = '';
-            posts.body.documents[i].downVoted = '';
-            if(loggedIn) {
-                var vote = _.find(posts.body.documents[i].votes, {user_id: posts.body.user}); // works. why?
-                if (vote && vote.vote !== 0) {
-                    if ( vote.vote > 0) posts.body.documents[i].upVoted = ' on';
-                    else if ( vote.vote < 0 ) posts.body.documents[i].downVoted = ' on';
-                }
-            } 
+        post.body.upVoted = '';
+        post.body.downVoted = '';
+        if(loggedIn) {
+            var vote = _.find(post.body.votes, {user_id: post.body.user}); // works. why?
+            if (vote && vote.vote !== 0) {
+                if ( vote.vote > 0) post.body.upVoted = ' on';
+                else if ( vote.vote < 0 ) post.body.downVoted = ' on';
+            }
         }
         
-        posts.body.documents.forEach(function(element, index, array){
-            $('.maincontent-container').append(view.postTemplate.render({
+        $('.maincontent-container').append(view.postTemplate.render({
 
-                postId: element._id,
+            postId: post.body._id,
 
-                header: view.postHeaderTemplate.render({
-                    title: element.title,
-                    author: element.postedBy.alias,
-                    postId: element._id
-                }),
+            header: view.postHeaderTemplate.render({
+                title:  post.body.title,
+                author:  post.body.postedBy.alias, 
+                postId:  post.body._id
+            }),
 
-                media: view.postMediaTemplate.render({}),
-                details: view.postDetailsTemplate.render({
-                    buttons: view.postButtonsTemplate.render({
-                        upvote: view.postUpvoteTemplate.render({
-                            upVoted: element.upVoted
-                        }),
-                        downvote: view.postDownvoteTemplate.render({
-                            downVoted: element.downVoted
-                        })
+            media: view.postMediaTemplate.render({}),
+            details: view.postDetailsTemplate.render({
+                buttons: view.postButtonsTemplate.render({
+                    upvote: view.postUpvoteTemplate.render({
+                        upVoted:  post.body.upVoted
                     }),
-                    votecount:view.postcountTemplate.render({
-                        postScore: element.votes.reduce(function(a, b) {
-                            return a + b.vote;  
-                        }, 0)
+                    downvote: view.postDownvoteTemplate.render({
+                        downVoted:  post.body.downVoted
                     })
+                }),
+                votecount:view.postcountTemplate.render({
+                    postScore:  post.body.votes.reduce(function(a, b) {
+                        return a + b.vote;  
+                    }, 0)
                 })
-            }));
-        });
+            })
+        }));
         view.isActive = false;
      }, 
 

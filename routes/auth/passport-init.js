@@ -1,7 +1,7 @@
 var passport = require('passport');
 var localStrategy = require('passport-local').Strategy;
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
-var config = require('./oauth.js');
+var config = require('./oauth.js'); // use process env instead
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var appDB = require('../../data/appDB');
@@ -93,12 +93,12 @@ passport.use('google', new GoogleStrategy({
                     alias: profile.displayName,
                     email:profile.email
                 });
-                            user.save()
-                                .then(() => {
-                                    console.log("saving user ...");
-                                    done(null, user);
-                                })
-                                .catch(error => console.log(error));
+                user.save()
+                    .then(() => {
+                        console.log("saving user ...");
+                        done(null, user);
+                    })
+                    .catch(error => console.log(error));
             }
         });
     }

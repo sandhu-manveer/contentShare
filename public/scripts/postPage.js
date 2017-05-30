@@ -1,14 +1,14 @@
-// var model = require('./modules/postModel.js');
-// var view = require('./modules/postView.js');
+var model = require('./modules/postModel.js');
+var view = require('./modules/postView.js');
 
 /**
  * Initialize Post Page js
  */
-var postView = {
+var postPage = {
     init: function() {
-        // view.init();
-        console.log('post view');
+        model.init();
+        view.init();
     }
 }
 
-postView.init();
+postPage.init();

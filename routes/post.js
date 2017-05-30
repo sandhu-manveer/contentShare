@@ -29,9 +29,9 @@ router.route('/post/:postId')
   })
   .get(function (req, res, next) {
     Post.findOne({ '_id': req.params.postId }).lean().exec()
-            .then((post) => {
-                if (!post) res.sendStatus(404);
-                else res.render('postPage', {post: post}); //HBS worked when json sent, dont stringify
-            })
-            .catch(err => next(err));
+        .then((post) => {
+            if (!post) res.sendStatus(404);
+            else res.render('postPage', {postId: post._id.toString()}); //HBS worked when json sent, dont stringify
+        })
+        .catch(err => next(err));
   }); 

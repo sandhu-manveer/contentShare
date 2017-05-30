@@ -185,7 +185,7 @@ router.route('/vote')
                         {$addToSet: { postsVoted : document._id }}).exec()
                             .then(() => {
                                 res.status(200);
-                                res.json({ isLoggedIn: true, vote: vote.vote })
+                                res.json({ isLoggedIn: true, vote: vote.vote });
                             })
                             .catch(next);
                     })
@@ -242,7 +242,7 @@ router.route('/getSinglePost/:postId')
             return;
         }
 
-        Post.findOne({ '_id': req.params.postId }).lean().exec()
+        Post.findOne({ '_id': req.params.postId }).populate('postedBy', ['alias']).exec()
             .then((post) => {
                 if (!post) res.sendStatus(404);
                 res.send(post);
@@ -284,8 +284,15 @@ router.route('/postComment')
                 addCommentToPost(newComments, commentModel, parent_id);
                 post.comments = newComments;
                 post.save()
-                    .then(() => {
-                        res.redirect(req.originalUrl);
+                    .then((comment) => {
+                        // save comment in user document
+                        User.update({ _id: mongoose.Types.ObjectId(user_id)},
+                        {$addToSet: { comments : {post_id: mongoose.Types.ObjectId(post_id), comment_id: comment._id} }}).exec()
+                            .then(() => {
+                                res.status(200);
+                                res.redirect(req.originalUrl);
+                            })
+                            .catch(next);
                     })
                     .catch(err => next(err));
             })
