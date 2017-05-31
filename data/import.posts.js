@@ -1,7 +1,7 @@
 // cli tool to check db
 require('dotenv').config(); 
 var posts = require(__dirname + '/posts.json');
-var appDB = require('./appDB');
+var appDB = require('../models/appDB');
 var Post = appDB.Post; 
 
 Post.insertMany(posts)

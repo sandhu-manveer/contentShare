@@ -4,7 +4,7 @@ var GoogleStrategy = require('passport-google-oauth2').Strategy;
 var config = require('./oauth.js'); // use process env instead
 var _ = require('lodash');
 var mongoose = require('mongoose');
-var appDB = require('../../data/appDB');
+var appDB = require('../../models/appDB');
 var User = appDB.User;
 
 passport.use('local-login', new localStrategy(function(email, password, done){

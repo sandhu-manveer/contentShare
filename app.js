@@ -50,7 +50,7 @@ app.use(authRouter);
 var postPageRouter = require("./routes/post");
 app.use(postPageRouter);
 
-var apiRouter = require("./api/api");
+var apiRouter = require("./routes/api/api");
 app.use("/api", apiRouter);
 
 function checkAuth(req, res, next) {
@@ -89,7 +89,7 @@ var server = app.listen(process.env.APP_PORT, function () {
 var gracefulShutdown = function() {
   console.log("Received kill signal, shutting down gracefully.");
 
-  var appDB = require('./data/appDB');
+  var appDB = require('./models/appDB');
   appDB.close(() => {
     console.log('Mongo connection closed')
     server.close(() => {

@@ -1,6 +1,6 @@
 var express = require('express');
 var mongoose = require('mongoose');
-var appDB = require('../data/appDB');
+var appDB = require('../models/appDB');
 var Post = appDB.Post;
 
 var router = express.Router();

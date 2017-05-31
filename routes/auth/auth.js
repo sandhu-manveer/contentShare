@@ -1,6 +1,6 @@
 var express = require('express');
 var passport = require('passport');
-var appDB = require('../../data/appDB');
+var appDB = require('../../models/appDB');
 var request = require('request');
 var User = appDB.User;
 
@@ -51,7 +51,7 @@ router.route('/signup')
             res.render('signup', {message: req.flash()});
         })
     .post(passport.authenticate('local-signup', {
-            successRedirect: '/login',
+            successRedirect: '/',
             failureRedirect: '/signup',
             failureFlash : true
         }));

@@ -2,7 +2,7 @@ var express = require("express");
 var mongoose = require('mongoose');
 var _ = require('lodash');
 
-var appDB = require('../data/appDB');
+var appDB = require('../../models/appDB');
 var Post = appDB.Post;
 var User = appDB.User;
 var Comment = appDB.Comment;
