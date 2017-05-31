@@ -22,10 +22,27 @@ var view = module.exports = {
 
     postDownvoteTemplate: $.templates('<span id="downVote" class="post-vote-do-down{{:downVoted}}"></span>'),
 
-    postcountTemplate: $.templates('<div class="vote-count"><span class="post-votes">{{:postScore}}</span></div>'),
+    postCountTemplate: $.templates('<div class="vote-count"><span class="post-votes">{{:postScore}}</span></div>'),
 
-    // flag to check if req to server is active
-    isActive: false,
+    // html template for comments
+    commentTemplate: $.templates('<div class="comment-body" comment-id="{{:commentId}}">{{:commentHeader}}{{:commentText}}{{:commentDetails}}<div class="child"></div></div>'),
+
+    commentHeaderTemplate: $.templates('<header class="comment-body-header"><span class="comment-body-author">{{:commentAuthor}}</span><span class="comment-body-time">{{:commentTime}}</span></header>'),
+
+    commentTextTemplate: $.templates('<div class="comment-body-text">{{:commentText}}</div>'),
+
+    commentDetailsTemplate: $.templates('<div class="comment-details-pane">{{:commentVoteButtons}}{{:commentVoteCount}}</div>'),
+
+    commentButtonsTemplate: $.templates('<div class="comment-vote">{{:commentUpVote}}{{:commentDownVote}}</div>'),
+
+    commentUpvoteTemplate: $.templates('<span id="upVote" class="comment-vote-do-up{{:commentUpVoted}}"></span>'),
+
+    commentDownvoteTemplate: $.templates('<span id="downVote" class="comment-vote-do-down{{:commentDownVoted}}"></span>'),
+
+    commentVoteCountTemplate: $.templates('<div class="vote-count"><span class="post-votes">{{:commentScore}}</span></div>'),
+
+    // temporarily save post data
+    postData: {},
 
     /**
      * fetch post from server and render
@@ -35,6 +52,7 @@ var view = module.exports = {
         helper.getPostData(postId)
             .then(function(res){
                     view.renderPost();
+                    view.renderComments();
                     $('#loading').hide();
                     // initialize click listeners after fetch
                     view.initToggle();
@@ -47,8 +65,8 @@ var view = module.exports = {
      * checks login status and accordingly displays up/down votes and score
      */
     renderPost: function() {
-        console.log('renderPost')
-        var post = helper.getCurrentPostData();
+        view.postData = helper.getCurrentPostData();
+        var post = view.postData;
         var loggedIn = false;
 
         if(post.body.user) {
@@ -88,14 +106,13 @@ var view = module.exports = {
                         downVoted:  post.body.downVoted
                     })
                 }),
-                votecount:view.postcountTemplate.render({
+                votecount:view.postCountTemplate.render({
                     postScore:  post.body.votes.reduce(function(a, b) {
                         return a + b.vote;  
                     }, 0)
                 })
             })
         }));
-        view.isActive = false;
      }, 
 
     /**
@@ -140,5 +157,56 @@ var view = module.exports = {
             if (clickedClass === 'post-vote-do-down' && otherClass === 'post-vote-do-up on') retVal = retVal - 2;         
             return retVal.toString();
         });
+    },
+
+    renderComments: function() {
+        var comments = view.postData.body.comments;
+
+        // TODO: add login check
+        var result = $('.maincontent-container');
+        iterateAndRenderComments(result, comments, null);
+
+        function iterateAndRenderComments(result, comments, parent_id) {
+            for (var i = 0; i < comments.length; i++) {
+                child = comments[i];
+                if(!parent_id) result.append(view.renderCommentTemplates(child));
+                else result.find('[comment-id='+ parent_id +']').children('.child').append(view.renderCommentTemplates(child))
+                if(child.comments && child.comments.length > 0) {
+                    iterateAndRenderComments(result, child.comments, child._id);
+                }
+            }
+        }
+    },
+
+    renderCommentTemplates: function(comment) {
+        return $('<div/>').html(view.commentTemplate.render({
+
+            commentId: comment._id,
+
+            commentHeader: view.commentHeaderTemplate.render({
+                commentAuthor:  comment.user_id, 
+                commentTime:  comment.postedTime
+            }),
+
+            commentText: view.commentTextTemplate.render({
+                commentText: comment.text
+            }),
+
+            commentDetails: view.commentDetailsTemplate.render({
+                commentVoteButtons: view.commentButtonsTemplate.render({
+                    commentUpVote: view.commentUpvoteTemplate.render({
+                        upVoted: comment.upVoted
+                    }),
+                    commentDownVote: view.commentDownvoteTemplate.render({
+                        commentDownVoted:  comment.downVoted
+                    })
+                }),
+                commentVoteCount: view.commentVoteCountTemplate.render({
+                    commentScore: comment.votes.reduce(function(a, b) {
+                        return a + b.vote;  
+                    }, 0)
+                })
+            })
+        })).contents();
     }
 };

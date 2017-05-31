@@ -321,7 +321,7 @@ function addCommentToPost(comments, comment, parent_id) {
         return;
     }
 
-    for (var i = 0; i <  comments.length; i++) {
+    for (var i = 0; i < comments.length; i++) {
         child = comments[i];
         if (child._id.toString() === parent_id.toString()) {
             child.comments.push(comment);
