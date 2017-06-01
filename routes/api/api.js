@@ -53,7 +53,7 @@ router.route('/uploadPost')
             .then((result) => {
                 // save post id in user document
                 User.update({ '_id': res.locals.user._id },
-                { $push: { 'posts': result._id } }).exec()
+                    { $push: { 'posts': result._id } }).exec()
                     .then(() => {
                         res.status(200);
                         res.redirect('/');
@@ -99,12 +99,13 @@ router.route('/getPosts')
         } else {
             timeStamp = req.query.lastTime;
         }
-
         var searchFilter = {
             postedTime: {
                 $lt: timeStamp
             }
         };
+        if (req.query.userPost != null)
+            searchFilter.postedBy = req.query.userPost;
 
         // check correct way to name collection and model
         // ensure password is not returned
@@ -181,8 +182,8 @@ router.route('/vote')
                 document.save()
                     .then(() => {
                         // add post to user doc (postsVoted)
-                        User.update({ _id: mongoose.Types.ObjectId(req.session.passport.user)},
-                        {$addToSet: { postsVoted : document._id }}).exec()
+                        User.update({ _id: mongoose.Types.ObjectId(req.session.passport.user) },
+                            { $addToSet: { postsVoted: document._id } }).exec()
                             .then(() => {
                                 res.status(200);
                                 res.json({ isLoggedIn: true, vote: vote.vote });
@@ -264,20 +265,20 @@ router.route('/postComment')
         // var user_id = res.locals.user._id;
         var user_id = req.body.user_id; // change after testing (checkAuth)
         var post_id = req.body.post_id;
-        if(req.body.parent_id === ""){
+        if (req.body.parent_id === "") {
             var parent_id = null;
-        } else if(!mongoose.Types.ObjectId.isValid(req.body.parent_id)) {
+        } else if (!mongoose.Types.ObjectId.isValid(req.body.parent_id)) {
             res.sendStatus(404);
             return;
         } else {
             var parent_id = mongoose.Types.ObjectId(req.body.parent_id);
         }
-        
+
         var commentModel = new Comment();
 
         createCommentFromRequestObj(commentModel, req);
 
-        Post.findOne({ '_id': post_id}).exec()
+        Post.findOne({ '_id': post_id }).exec()
             .then((post) => {
                 // Too slow? review approach
                 var newComments = post.comments;
@@ -286,8 +287,8 @@ router.route('/postComment')
                 post.save()
                     .then((comment) => {
                         // save comment in user document
-                        User.update({ _id: mongoose.Types.ObjectId(user_id)},
-                        {$addToSet: { comments : {post_id: mongoose.Types.ObjectId(post_id), comment_id: comment._id} }}).exec()
+                        User.update({ _id: mongoose.Types.ObjectId(user_id) },
+                            { $addToSet: { comments: { post_id: mongoose.Types.ObjectId(post_id), comment_id: comment._id } } }).exec()
                             .then(() => {
                                 res.status(200);
                                 res.redirect(req.originalUrl);
@@ -316,7 +317,7 @@ function createCommentFromRequestObj(commentModel, request) {
 function addCommentToPost(comments, comment, parent_id) {
 
     // initial comment
-    if(!parent_id) {
+    if (!parent_id) {
         comments.push(comment);
         return;
     }
@@ -328,7 +329,7 @@ function addCommentToPost(comments, comment, parent_id) {
             return;
         }
         if (child.comments) {
-             addCommentToPost(child.comments, comment, parent_id);
+            addCommentToPost(child.comments, comment, parent_id);
         }
     }
 }

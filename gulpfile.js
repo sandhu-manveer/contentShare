@@ -23,7 +23,7 @@ gulp.task('images', function() {
 gulp.task('scripts', function(){
 
     // files to be bundled
-    var files = ['public/scripts/main.js', 'public/scripts/validator.js', 'public/scripts/postPage.js'];
+    var files = ['public/scripts/main.js', 'public/scripts/validator.js', 'public/scripts/postPage.js','public/scripts/userPage.js'];
 
     var tasks = files.map(file => {
         return browserify({

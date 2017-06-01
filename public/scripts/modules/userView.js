@@ -1,4 +1,4 @@
-var helper = require('./helper.js');
+var helper = require('./userHelper.js');
 var _ = require('lodash');
 
 var view = module.exports = {
@@ -66,7 +66,8 @@ var view = module.exports = {
      * fetch posts from server and render
      */
     fetchAndRender: function() {
-        helper.getPostData()
+        var userId = $('meta[name=userId]').attr("content");
+        helper.getPostData(userId)
             .then(function(res){
                     view.renderPosts();
                     $('#loading').hide();

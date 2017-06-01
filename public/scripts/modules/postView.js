@@ -12,7 +12,7 @@ var view = module.exports = {
 
     postMediaTemplate: $.templates('<figure class="maincontent-post-media"></figure>'),
 
-    postHeaderTemplate: $.templates('<header class="maincontent-post-header"><h3 class="post-heading"><a href="/post/{{:postId}}">{{:title}}</a></h3><p>{{:author}}</p></header>'),
+    postHeaderTemplate: $.templates('<header class="maincontent-post-header"><h3 class="post-heading"><a href="/post/{{:postId}}">{{:title}}</a></h3><p class="post-heading"><a href="/user/{{:userId}}">{{:author}}</a></p></header>'),
     
     postDetailsTemplate: $.templates('<div class="maincontent-post-details">{{:buttons}} {{:votecount}}</div>'),
 
@@ -86,14 +86,15 @@ var view = module.exports = {
             }
         }
         
-        $('.maincontent-container').append(view.postTemplate.render({
+        $('.mainpost-container').append(view.postTemplate.render({
 
             postId: post.body._id,
 
             header: view.postHeaderTemplate.render({
                 title:  post.body.title,
                 author:  post.body.postedBy.alias, 
-                postId:  post.body._id
+                postId:  post.body._id,
+                userId: post.body.postedBy._id
             }),
 
             media: view.postMediaTemplate.render({}),
@@ -163,7 +164,7 @@ var view = module.exports = {
         var comments = view.postData.body.comments;
 
         // TODO: add login check
-        var result = $('.maincontent-container');
+        var result = $('.maincomment-container');
         iterateAndRenderComments(result, comments, null);
 
         function iterateAndRenderComments(result, comments, parent_id) {

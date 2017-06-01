@@ -50,6 +50,9 @@ app.use(authRouter);
 var postPageRouter = require("./routes/post");
 app.use(postPageRouter);
 
+var userPageRouter = require("./routes/user");
+app.use(userPageRouter);
+
 var apiRouter = require("./routes/api/api");
 app.use("/api", apiRouter);
 
