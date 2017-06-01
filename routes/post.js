@@ -19,13 +19,13 @@ function checkAuth(req, res, next) {
         next();
         return;
     }
-    res.redirect('/login');
+    else next();
 }
 
 router.route('/post/:postId')
   .all(function(req, res, next){
     if (!req.params.postId || !mongoose.Types.ObjectId.isValid(req.params.postId)) res.sendStatus(404);
-    else next();
+    checkAuth(req, res, next);
   })
   .get(function (req, res, next) {
     Post.findOne({ '_id': req.params.postId }).lean().exec()

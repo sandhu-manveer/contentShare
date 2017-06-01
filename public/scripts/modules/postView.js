@@ -66,49 +66,49 @@ var view = module.exports = {
      */
     renderPost: function() {
         view.postData = helper.getCurrentPostData();
-        var post = view.postData;
+        var post = view.postData.body.post;
         var loggedIn = false;
 
-        if(post.body.user) {
+        if(view.postData.body.user) {
             // does using a boolean provide any advantage?
             loggedIn = true;
         }
-        
+
         // too slow?
-        // iteration over all the votes, correct
-        post.body.upVoted = '';
-        post.body.downVoted = '';
+        // iteration over all the votes, correct?
+        post.upVoted = '';
+        post.downVoted = '';
         if(loggedIn) {
-            var vote = _.find(post.body.votes, {user_id: post.body.user}); // works. why?
+            var vote = _.find(post.votes, {user_id: view.postData.body.user}); // works. why?
             if (vote && vote.vote !== 0) {
-                if ( vote.vote > 0) post.body.upVoted = ' on';
-                else if ( vote.vote < 0 ) post.body.downVoted = ' on';
+                if ( vote.vote > 0) post.upVoted = ' on';
+                else if ( vote.vote < 0 ) post.downVoted = ' on';
             }
         }
         
         $('.mainpost-container').append(view.postTemplate.render({
 
-            postId: post.body._id,
+            postId: post._id,
 
             header: view.postHeaderTemplate.render({
-                title:  post.body.title,
-                author:  post.body.postedBy.alias, 
-                postId:  post.body._id,
-                userId: post.body.postedBy._id
+                title:  post.title,
+                author:  post.postedBy.alias, 
+                postId:  post._id,
+                userId: post.postedBy._id
             }),
 
             media: view.postMediaTemplate.render({}),
             details: view.postDetailsTemplate.render({
                 buttons: view.postButtonsTemplate.render({
                     upvote: view.postUpvoteTemplate.render({
-                        upVoted:  post.body.upVoted
+                        upVoted: post.upVoted
                     }),
                     downvote: view.postDownvoteTemplate.render({
-                        downVoted:  post.body.downVoted
+                        downVoted: post.downVoted
                     })
                 }),
                 votecount:view.postCountTemplate.render({
-                    postScore:  post.body.votes.reduce(function(a, b) {
+                    postScore: post.votes.reduce(function(a, b) {
                         return a + b.vote;  
                     }, 0)
                 })
@@ -161,7 +161,7 @@ var view = module.exports = {
     },
 
     renderComments: function() {
-        var comments = view.postData.body.comments;
+        var comments = view.postData.body.post.comments;
 
         // TODO: add login check
         var result = $('.maincomment-container');
@@ -171,7 +171,7 @@ var view = module.exports = {
             for (var i = 0; i < comments.length; i++) {
                 child = comments[i];
                 if(!parent_id) result.append(view.renderCommentTemplates(child));
-                else result.find('[comment-id='+ parent_id +']').children('.child').append(view.renderCommentTemplates(child))
+                else result.find('[comment-id='+ parent_id +']').children('.child').append(view.renderCommentTemplates(child));
                 if(child.comments && child.comments.length > 0) {
                     iterateAndRenderComments(result, child.comments, child._id);
                 }
