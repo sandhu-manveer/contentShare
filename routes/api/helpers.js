@@ -60,9 +60,27 @@ var addCommentToPost = function (comments, comment, parent_id) {
     }
 }
 
+/**
+ * Helper function to delete comment from post
+ */
+var deleteCommentFromPost = function (comments, comment_id, user_id) {
+    for (var i = 0; i < comments.length; i++) {
+        child = comments[i];
+        if (child._id.toString() === comment_id && child.user_id.toString() === user_id) {
+            comments.splice(i, 1);
+            return;
+        } else if (child._id.toString() === comment_id && child.user_id.toString() !== user_id){
+            return;
+        } else if (child.comments) {
+            deleteCommentFromPost(child.comments, comment_id, user_id);
+        }
+    }
+}
+
 module.exports = {
     checkAuth,
     createPostFromRequestObj,
     createCommentFromRequestObj,
+    deleteCommentFromPost,
     addCommentToPost
 }

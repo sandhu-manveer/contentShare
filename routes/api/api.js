@@ -21,4 +21,7 @@ router.use(getSinglePost);
 var postComment = require('./postComment');
 router.use(postComment);
 
+var deleteComment = require('./deleteComment');
+router.use(deleteComment);
+
 module.exports = router;

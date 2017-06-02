@@ -49,10 +49,10 @@ router.route('/postComment')
                 addCommentToPost(newComments, commentModel, parent_id);
                 post.comments = newComments;
                 post.save()
-                    .then((comment) => {
+                    .then((post) => {
                         // save comment in user document
                         User.update({ _id: mongoose.Types.ObjectId(user_id) },
-                            { $addToSet: { comments: { post_id: mongoose.Types.ObjectId(post_id), comment_id: comment._id } } }).exec()
+                            { $addToSet: { comments: { post_id: mongoose.Types.ObjectId(post_id), comment_id: commentModel._id } } }).exec()
                             .then(() => {
                                 res.status(200);
                                 res.redirect(req.originalUrl);
