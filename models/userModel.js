@@ -13,7 +13,8 @@ var schema = new mongoose.Schema({
     postsVoted: [ mongoose.Schema.Types.ObjectId ],
     posts: [ { type: mongoose.Schema.Types.ObjectId, ref: 'post' } ],
     comments: [ { post_id: {type: mongoose.Schema.Types.ObjectId, required: true}, comment_id: {type: mongoose.Schema.Types.ObjectId, required: true} } ],
-    dateCreated: { type: Date, default: Date.now }
+    dateCreated: { type: Date, default: Date.now },
+    verified: {type: Boolean, default: false}
 }, schemaOptions);
 
 // middleware to ensure passwords are hashed

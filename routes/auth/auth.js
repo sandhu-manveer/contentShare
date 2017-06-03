@@ -1,11 +1,13 @@
 var express = require('express');
 var passport = require('passport');
 var appDB = require('../../models/appDB');
-var request = require('request');
 var User = appDB.User;
 
 var router = express.Router();
 module.exports = router;
+
+var verificationRouter = require("./verify");
+router.use(verificationRouter);
 
 router.route('/login')
     .all(function(req, res, next){

@@ -5,7 +5,11 @@ var config = require('./oauth.js'); // use process env instead
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var appDB = require('../../models/appDB');
+var helper = require('./helper');
+
+var sendVerificationEmail = helper.sendVerificationEmail;
 var User = appDB.User;
+var Verify = appDB.Verify;
 
 passport.use('local-login', new localStrategy(function(email, password, done){
     // var user = _.find(users, u => u.alias === alias);
@@ -63,8 +67,26 @@ function(req, email, password, done){
                 });
 
                 newUser.save()
-                    .then(() => {
-                        done(null, newUser);
+                    .then((savedUser) => {
+                        var verify = new Verify({user_id: savedUser._id});
+                        verify.createVerificationToken(function (err, token) {
+                            if (err) return console.log("Couldn't create verification token", err);
+                            var message = {
+                                email: savedUser.email,
+                                name: savedUser.alias,
+                                verifyURL: req.protocol + "://" + req.get('host') + "/verify/" + token
+                            };
+                            sendVerificationEmail(message, function (error, success) {
+                                if (error) {
+                                    // not much point in attempting to send again, so we give up
+                                    // will need to give the user a mechanism to resend verification
+                                    console.error("Unable to send via postmark: " + error.message);
+                                    return;
+                                }
+                                console.info("Sent to postmark for delivery");
+                            });
+                            done(null, newUser);
+                        });
                     })
                     .catch(err => {
                         throw err;
