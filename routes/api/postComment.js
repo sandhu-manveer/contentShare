@@ -22,14 +22,14 @@ module.exports = router;
  */
 router.route('/postComment')
     .all(function (req, res, next) {
-        //checkAuth(req, res, next); // removed for testing
-        next();
+        checkAuth(req, res, next); // removed for testing
+       // next();
     })
     .post(function (req, res, next) {
-        // var user_id = res.locals.user._id;
-        var user_id = req.body.user_id; // change after testing (checkAuth)
-        var post_id = req.body.post_id;
-        if (req.body.parent_id === "") {
+        var user_id = res.locals.user._id;
+       // var user_id = req.body.user_id; // change after testing (checkAuth)
+       var post_id = req.body.postId;
+        if (req.body.parent_id === undefined) {
             var parent_id = null;
         } else if (!mongoose.Types.ObjectId.isValid(req.body.parent_id)) {
             res.sendStatus(404);
@@ -55,7 +55,7 @@ router.route('/postComment')
                             { $addToSet: { comments: { post_id: mongoose.Types.ObjectId(post_id), comment_id: commentModel._id } } }).exec()
                             .then(() => {
                                 res.status(200);
-                                res.redirect(req.originalUrl);
+                                res.redirect("/post/"+post_id);
                             })
                             .catch(next);
                     })

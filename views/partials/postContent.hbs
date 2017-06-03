@@ -4,6 +4,13 @@
         <h1>Post content</h1>
         <div class="mainpost-container"></div>
         <div class="maincomment-container">
+            <div class="newcomment-container">
+                <form class="form-horizontal" action="/api/postComment" method="POST">
+                    <input class="comment-input"type="text" placeholder="Enter your thoughts" name="text">
+                    <input type="hidden" name="postId" value={{postId}} />
+                    <input type="submit" value="Comment">
+                </form>
+            </div>
         </div>
 
     </div>
