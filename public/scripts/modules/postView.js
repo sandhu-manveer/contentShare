@@ -31,7 +31,7 @@ var view = module.exports = {
 
     commentTextTemplate: $.templates('<div class="comment-body-text">{{:commentText}}</div>'),
 
-    commentDetailsTemplate: $.templates('<div class="comment-details-pane">{{:commentVoteButtons}}{{:commentVoteCount}}</div>'),
+    commentDetailsTemplate: $.templates('<div class="comment-details-pane">{{:commentVoteButtons}}{{:commentVoteCount}}{{:commentReplyButton}}</div>'),
 
     commentButtonsTemplate: $.templates('<div class="comment-vote">{{:commentUpVote}}{{:commentDownVote}}</div>'),
 
@@ -39,7 +39,9 @@ var view = module.exports = {
 
     commentDownvoteTemplate: $.templates('<span id="downVote" class="comment-vote-do-down{{:commentDownVoted}}"></span>'),
 
-    commentVoteCountTemplate: $.templates('<div class="vote-count"><span class="post-votes">{{:commentScore}}</span></div>'),
+    commentVoteCountTemplate: $.templates('<div class="comment-vote-count"><span class="post-votes">{{:commentScore}}</span></div>'),
+
+    commentReplyTemplate: $.templates('<div class="comment-reply"><button type="button" class="replyButton btn btn-default btn-xs">Reply</button></div>'),
 
     // temporarily save post data
     postData: {},
@@ -56,6 +58,7 @@ var view = module.exports = {
                     $('#loading').hide();
                     // initialize click listeners after fetch
                     view.initToggle();
+                    view.initReplyButtons();
             })
             .catch(function(err){console.log(err);});
     },
@@ -206,8 +209,29 @@ var view = module.exports = {
                     commentScore: comment.votes.reduce(function(a, b) {
                         return a + b.vote;  
                     }, 0)
-                })
+                }),
+                commentReplyButton: view.commentReplyTemplate.render({})
             })
         })).contents();
+    },
+
+    initReplyButtons: function() {
+        $('.replyButton').on('click', function(){
+            var replyButton = $(this);
+            var parent_id = replyButton.parents('.comment-body').first().attr('comment-id');
+            var postId = $('meta[name=postId]').attr("content");
+
+            var replyHTML = '<div class="reply-container">';
+            replyHTML += '<form class="form-horizontal" action="/api/postComment" method="POST">';
+            replyHTML += '<input class="comment-input"type="text" placeholder="Reply" name="text">';
+            replyHTML += '<input type="hidden" name="postId" value='+ postId +' />';
+            replyHTML += '<input type="hidden" name="parent_id" value='+ parent_id +' />';
+            replyHTML += '<input type="submit" value="Reply">';
+            replyHTML += '</form>';
+            replyHTML += '</div>';
+
+            replyButton.parents('.comment-details-pane').first().after(replyHTML);
+            replyButton.hide();
+        });
     }
 };
