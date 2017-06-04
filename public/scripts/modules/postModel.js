@@ -43,5 +43,24 @@ var model = module.exports = {
                 resolve(model.voteResponse);
             });
         });
+    },
+
+    /**
+     * up/down vote comment request to server
+     * 
+     * @param {String} postId mongo object id of post
+     * @param {String} comment_id mongo id of comment
+     * @param {String} type up or down vote
+     */
+    voteComment: function(postId, comment_id, type) {
+        return new Promise(function(resolve, reject){
+            request
+            .get('/api/commentVote')
+            .query('postId='+ postId + '&comment_id=' + comment_id + '&type=' + type)
+            .end(function(err, response){
+                model.voteResponse = response;
+                resolve(model.voteResponse);
+            });
+        });
     }
 };

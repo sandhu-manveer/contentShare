@@ -12,6 +12,9 @@ router.use(getPosts);
 var vote = require("./vote");
 router.use(vote);
 
+var commentVote = require("./commentVote");
+router.use(commentVote);
+
 var deletePost = require('./deletePost');
 router.use(deletePost);
 

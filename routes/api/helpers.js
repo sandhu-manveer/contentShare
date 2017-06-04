@@ -77,10 +77,26 @@ var deleteCommentFromPost = function (comments, comment_id, user_id) {
     }
 }
 
+/**
+ * Helper function to find comment
+ */
+var findCommentById = function (comments, comment_id) {
+    for (var i = 0; i < comments.length; i++) {
+        child = comments[i];
+        if (child._id.toString() === comment_id) {
+            return child;
+        }
+        if (child.comments) {
+            return findCommentById(child.comments, comment_id);
+        }
+    }
+}
+
 module.exports = {
     checkAuth,
     createPostFromRequestObj,
     createCommentFromRequestObj,
     deleteCommentFromPost,
-    addCommentToPost
+    addCommentToPost,
+    findCommentById
 }

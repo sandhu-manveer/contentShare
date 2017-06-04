@@ -39,7 +39,7 @@ var view = module.exports = {
 
     commentDownvoteTemplate: $.templates('<span id="downVote" class="comment-vote-do-down{{:commentDownVoted}}"></span>'),
 
-    commentVoteCountTemplate: $.templates('<div class="comment-vote-count"><span class="post-votes">{{:commentScore}}</span></div>'),
+    commentVoteCountTemplate: $.templates('<div class="comment-vote-count"><span class="comment-votes">{{:commentScore}}</span></div>'),
 
     commentReplyTemplate: $.templates('<div class="comment-reply"><button type="button" class="replyButton btn btn-default btn-xs">Reply</button></div>'),
 
@@ -59,6 +59,7 @@ var view = module.exports = {
                     // initialize click listeners after fetch
                     view.initToggle();
                     view.initReplyButtons();
+                    view.initCommentVoteToggle();
             })
             .catch(function(err){console.log(err);});
     },
@@ -165,14 +166,31 @@ var view = module.exports = {
 
     renderComments: function() {
         var comments = view.postData.body.post.comments;
+        var user_id = null;
+        var loggedIn = false;
 
-        // TODO: add login check
+        if(view.postData.body.user) {
+            // does using a boolean provide any advantage?
+            loggedIn = true;
+            user_id = view.postData.body.user;
+        }
+
         var result = $('.maincomment-container');
         iterateAndRenderComments(result, comments, null);
 
         function iterateAndRenderComments(result, comments, parent_id) {
             for (var i = 0; i < comments.length; i++) {
                 child = comments[i];
+                
+                child.upVoted = '';
+                child.downVoted = '';
+                if(loggedIn) {
+                    var vote = _.find(child.votes, {user_id: user_id}); // works. why?
+                    if (vote && vote.vote !== 0) {
+                        if ( vote.vote > 0) child.upVoted = ' on';
+                        else if ( vote.vote < 0 ) child.downVoted = ' on';
+                    }
+                } 
                 if(!parent_id) result.append(view.renderCommentTemplates(child));
                 else result.find('[comment-id='+ parent_id +']').children('.child').append(view.renderCommentTemplates(child));
                 if(child.comments && child.comments.length > 0) {
@@ -199,7 +217,7 @@ var view = module.exports = {
             commentDetails: view.commentDetailsTemplate.render({
                 commentVoteButtons: view.commentButtonsTemplate.render({
                     commentUpVote: view.commentUpvoteTemplate.render({
-                        upVoted: comment.upVoted
+                        commentUpVoted: comment.upVoted
                     }),
                     commentDownVote: view.commentDownvoteTemplate.render({
                         commentDownVoted:  comment.downVoted
@@ -233,5 +251,50 @@ var view = module.exports = {
             replyButton.parents('.comment-details-pane').first().after(replyHTML);
             replyButton.hide();
         });
-    }
+    },
+
+    /**
+     * Function to attach click listeners on up/down vote sprites on comments
+     */
+    initCommentVoteToggle: function() {
+        $('[class^=comment-vote-do-]').click(function() {
+            var element = this;
+            var type = $(this).attr('id');
+            var postId = $('meta[name=postId]').attr("content");
+            var comment_id = $(this).parents('.comment-body').first().attr('comment-id');
+            helper.voteComment(postId, comment_id, type)
+                .then(function(res){
+                    var response = helper.getVoteResponse();
+                    if(!response.body.isLoggedIn) {
+                        window.location.href = window.location.origin + '/login';
+                    } else {
+                        view.setVoteScore(element, response.body.vote);
+                        $(element).siblings().removeClass('on');
+                        $(element).toggleClass('on');
+                    }
+                })
+                .catch(function(err){console.log(err);});
+        });
+    },
+
+    /**
+     * Display change in comment score based on up/down vote
+     * 
+     * @param {document} element the html dom contianing post meta
+     * @param {String} vote up/down vote, obtained from comment id
+     */
+    setVoteScore: function(element, vote) {
+        $(element).parent().siblings('[class=comment-vote-count]').children('[class=comment-votes]').html(function(){             
+            var retVal = parseInt($(this).html());
+            var clickedClass = $(element).attr('class');
+            var otherClass = $(element).siblings().attr('class');
+            if (clickedClass === 'comment-vote-do-up' && otherClass === 'comment-vote-do-down') retVal = retVal + vote;
+            if (clickedClass === 'comment-vote-do-down' && otherClass === 'comment-vote-do-up') retVal = retVal + vote;
+            if (clickedClass === 'comment-vote-do-up on' && otherClass === 'comment-vote-do-down') retVal = retVal - 1;
+            if (clickedClass === 'comment-vote-do-down on' && otherClass === 'comment-vote-do-up') retVal = retVal + 1;  
+            if (clickedClass === 'comment-vote-do-up' && otherClass === 'comment-vote-do-down on') retVal = retVal + 2;
+            if (clickedClass === 'comment-vote-do-down' && otherClass === 'comment-vote-do-up on') retVal = retVal - 2;         
+            return retVal.toString();
+        });
+    },
 };

@@ -17,8 +17,16 @@ var helper = module.exports = {
         return model.voteResponse;
     },
 
+    getCommentVoteResponse: function() {
+        return model.getCommentVoteResponse;
+    },
+
     votePost: function(postId, type) {
         return model.votePost(postId, type);
+    },
+
+    voteComment: function(postId, comment_id, type) {
+        return model.voteComment(postId, comment_id, type);
     }
 
 };
