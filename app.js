@@ -34,7 +34,7 @@ app.use(require('express-session')({
   secret: 'some random secret',
   resave: false,
   saveUninitialized: false,
-  cookie: {maxAge: 60000}
+  cookie: {maxAge: 60000 * 60 * 24}
 }));
 // flash setup (requires session, cookieparser)
 app.use(flash());

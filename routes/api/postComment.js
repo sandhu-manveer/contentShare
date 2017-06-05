@@ -22,12 +22,10 @@ module.exports = router;
  */
 router.route('/postComment')
     .all(function (req, res, next) {
-        checkAuth(req, res, next); // removed for testing
-       // next();
+        checkAuth(req, res, next);
     })
     .post(function (req, res, next) {
         var user_id = res.locals.user._id;
-       // var user_id = req.body.user_id; // change after testing (checkAuth)
        var post_id = req.body.postId;
         if (req.body.parent_id === undefined) {
             var parent_id = null;

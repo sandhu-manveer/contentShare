@@ -18,27 +18,26 @@ module.exports = router;
  * Route to delete post from mongo
  * 
  */
-router.route('/deletePost/:postId')
+router.route('/deletePost')
     .all(function (req, res, next) {
         checkAuth(req, res, next);
     })
-    .get(function (req, res, next) {
-        if (!req.params.postId || !mongoose.Types.ObjectId.isValid(req.params.postId)) {
+    .post(function (req, res, next) {
+        if (!req.query.postId || !mongoose.Types.ObjectId.isValid(req.query.postId)) {
             res.sendStatus(500);
             return;
         }
 
         User.findOne({ '_id': res.locals.user._id }).exec()
             .then((user) => {
-                var post = _.find(user.posts, mongoose.Types.ObjectId(req.params.postId));
-                if (!post) res.sendStatus(404);
+                var post = _.find(user.posts, mongoose.Types.ObjectId(req.query.postId));
+                
                 Post.remove({ '_id': post })
                     .then(() => {
-                        user.posts = user.posts.filter(pId => pId.toString() !== req.params.postId);
-                        user.update({ $set: { posts: user.posts } })
+                        user.posts = user.posts.filter(pId => pId.toString() !== req.query.postId);
+                        user.save()
                             .then(() => {
-                                res.status(200);
-                                res.redirect('/');
+                                res.sendStatus(200);
                             })
                             .catch(next);
                     })

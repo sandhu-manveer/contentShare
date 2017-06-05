@@ -21,12 +21,10 @@ module.exports = router;
  */
 router.route('/deleteComment')
     .all(function (req, res, next) {
-        //checkAuth(req, res, next); // removed for testing
-        next();
+        checkAuth(req, res, next); 
     })
     .post(function (req, res, next) {
-        // var user_id = res.locals.user._id;
-        var user_id = req.body.user_id; // change after testing (checkAuth)
+        var user_id = res.locals.user._id;
         var post_id = req.body.post_id;
         var comment_id = req.body.comment_id;
 
@@ -44,7 +42,7 @@ router.route('/deleteComment')
                             res.status(200);
                             res.redirect(req.originalUrl);
                         })
-                        .catch(next);
+                        .catch(err => next(err));
                 })
                 .catch(err => next(err));
             })

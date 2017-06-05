@@ -25,8 +25,16 @@ var helper = module.exports = {
         return model.votePost(postId, type);
     },
 
+    deletePost: function(postId) {
+        return model.deletePost(postId);
+    },
+
     voteComment: function(postId, comment_id, type) {
         return model.voteComment(postId, comment_id, type);
+    },
+
+    deleteComment: function(commentJson) {
+        return model.deleteComment(commentJson);
     }
 
 };

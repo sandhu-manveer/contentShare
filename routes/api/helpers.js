@@ -34,7 +34,7 @@ var createPostFromRequestObj = function (post, request) {
  */
 var createCommentFromRequestObj = function (commentModel, request) {
     commentModel.text = request.body.text;
-    commentModel.user_id = mongoose.Types.ObjectId(request.body.user_id); // change to res.locals.user
+    commentModel.user_id = request.user._id;
 }
 
 /**
@@ -66,10 +66,10 @@ var addCommentToPost = function (comments, comment, parent_id) {
 var deleteCommentFromPost = function (comments, comment_id, user_id) {
     for (var i = 0; i < comments.length; i++) {
         child = comments[i];
-        if (child._id.toString() === comment_id && child.user_id.toString() === user_id) {
+        if (child._id.toString() === comment_id && child.user_id.toString() === user_id.toString()) {
             comments.splice(i, 1);
             return;
-        } else if (child._id.toString() === comment_id && child.user_id.toString() !== user_id){
+        } else if (child._id.toString() === comment_id && child.user_id.toString() !== user_id.toString()){
             return;
         } else if (child.comments) {
             deleteCommentFromPost(child.comments, comment_id, user_id);

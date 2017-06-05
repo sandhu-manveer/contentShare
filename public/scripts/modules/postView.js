@@ -14,7 +14,7 @@ var view = module.exports = {
 
     postHeaderTemplate: $.templates('<header class="maincontent-post-header"><h3 class="post-heading"><a href="/post/{{:postId}}">{{:title}}</a></h3><p class="post-heading"><a href="/user/{{:userId}}">{{:author}}</a></p></header>'),
     
-    postDetailsTemplate: $.templates('<div class="maincontent-post-details">{{:buttons}} {{:votecount}}</div>'),
+    postDetailsTemplate: $.templates('<div class="maincontent-post-details">{{:buttons}} {{:votecount}} {{:deleteButton}}</div>'),
 
     postButtonsTemplate: $.templates('<div class="post-vote">{{:upvote}}{{:downvote}}</div>'),
 
@@ -24,6 +24,8 @@ var view = module.exports = {
 
     postCountTemplate: $.templates('<div class="vote-count"><span class="post-votes">{{:postScore}}</span></div>'),
 
+    postDeleteButtonTemplate: $.templates('<div class="delete-button-container"><button type="button" class="deleteButton btn btn-default btn-xs">Delete</button></div>'),
+
     // html template for comments
     commentTemplate: $.templates('<div class="comment-body" comment-id="{{:commentId}}">{{:commentHeader}}{{:commentText}}{{:commentDetails}}<div class="child"></div></div>'),
 
@@ -31,7 +33,7 @@ var view = module.exports = {
 
     commentTextTemplate: $.templates('<div class="comment-body-text">{{:commentText}}</div>'),
 
-    commentDetailsTemplate: $.templates('<div class="comment-details-pane">{{:commentVoteButtons}}{{:commentVoteCount}}{{:commentReplyButton}}</div>'),
+    commentDetailsTemplate: $.templates('<div class="comment-details-pane">{{:commentVoteButtons}}{{:commentVoteCount}}{{:commentReplyButton}}{{:commentDeleteButton}}</div>'),
 
     commentButtonsTemplate: $.templates('<div class="comment-vote">{{:commentUpVote}}{{:commentDownVote}}</div>'),
 
@@ -42,6 +44,8 @@ var view = module.exports = {
     commentVoteCountTemplate: $.templates('<div class="comment-vote-count"><span class="comment-votes">{{:commentScore}}</span></div>'),
 
     commentReplyTemplate: $.templates('<div class="comment-reply"><button type="button" class="replyButton btn btn-default btn-xs">Reply</button></div>'),
+
+    commentDeleteButtonTemplate: $.templates('<div class="comment-delete-button-container"><button type="button" class="commentDeleteButton btn btn-default btn-xs">Delete</button></div>'),
 
     // temporarily save post data
     postData: {},
@@ -58,7 +62,9 @@ var view = module.exports = {
                     $('#loading').hide();
                     // initialize click listeners after fetch
                     view.initToggle();
+                    view.initDeleteButton();
                     view.initReplyButtons();
+                    view.initCommentDeleteButton();
                     view.initCommentVoteToggle();
             })
             .catch(function(err){console.log(err);});
@@ -82,12 +88,14 @@ var view = module.exports = {
         // iteration over all the votes, correct?
         post.upVoted = '';
         post.downVoted = '';
+        var deleteTemplate = null;
         if(loggedIn) {
             var vote = _.find(post.votes, {user_id: view.postData.body.user}); // works. why?
             if (vote && vote.vote !== 0) {
                 if ( vote.vote > 0) post.upVoted = ' on';
                 else if ( vote.vote < 0 ) post.downVoted = ' on';
             }
+            if (post.postedBy._id === view.postData.body.user) deleteTemplate = view.postDeleteButtonTemplate({});
         }
         
         $('.mainpost-container').append(view.postTemplate.render({
@@ -115,7 +123,8 @@ var view = module.exports = {
                     postScore: post.votes.reduce(function(a, b) {
                         return a + b.vote;  
                     }, 0)
-                })
+                }),
+                deleteButton: deleteTemplate
             })
         }));
      }, 
@@ -164,6 +173,17 @@ var view = module.exports = {
         });
     },
 
+    /**
+     * init delete button
+     * 
+     */
+    initDeleteButton: function() {
+        $('.deleteButton').on('click', function() {
+            var postId = $(this).parents('article').attr('post-id');
+            helper.deletePost(postId);
+        });
+    },
+
     renderComments: function() {
         var comments = view.postData.body.post.comments;
         var user_id = null;
@@ -184,15 +204,19 @@ var view = module.exports = {
                 
                 child.upVoted = '';
                 child.downVoted = '';
+                var deleteTemplate = null;
                 if(loggedIn) {
                     var vote = _.find(child.votes, {user_id: user_id}); // works. why?
                     if (vote && vote.vote !== 0) {
                         if ( vote.vote > 0) child.upVoted = ' on';
                         else if ( vote.vote < 0 ) child.downVoted = ' on';
                     }
+                    if(child.user_id) {
+                        if (child.user_id === view.postData.body.user) deleteTemplate = view.commentDeleteButtonTemplate({});
+                    }
                 } 
-                if(!parent_id) result.append(view.renderCommentTemplates(child));
-                else result.find('[comment-id='+ parent_id +']').children('.child').append(view.renderCommentTemplates(child));
+                if(!parent_id) result.append(view.renderCommentTemplates(child, deleteTemplate));
+                else result.find('[comment-id='+ parent_id +']').children('.child').append(view.renderCommentTemplates(child, deleteTemplate));
                 if(child.comments && child.comments.length > 0) {
                     iterateAndRenderComments(result, child.comments, child._id);
                 }
@@ -200,7 +224,7 @@ var view = module.exports = {
         }
     },
 
-    renderCommentTemplates: function(comment) {
+    renderCommentTemplates: function(comment, deleteTemplate) {
         return $('<div/>').html(view.commentTemplate.render({
 
             commentId: comment._id,
@@ -228,7 +252,8 @@ var view = module.exports = {
                         return a + b.vote;  
                     }, 0)
                 }),
-                commentReplyButton: view.commentReplyTemplate.render({})
+                commentReplyButton: view.commentReplyTemplate.render({}),
+                commentDeleteButton: deleteTemplate
             })
         })).contents();
     },
@@ -297,4 +322,15 @@ var view = module.exports = {
             return retVal.toString();
         });
     },
+
+     initCommentDeleteButton: function() {
+        $('.commentDeleteButton').on('click', function() {
+            var commentJson = {};
+            var post_id = $('meta[name=postId]').attr("content");
+            var comment_id = $(this).parents('.comment-body').first().attr('comment-id');
+            commentJson.post_id = post_id;
+            commentJson.comment_id = comment_id;
+            helper.deleteComment(commentJson);
+        });
+    }
 };

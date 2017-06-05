@@ -62,5 +62,23 @@ var model = module.exports = {
                 resolve(model.voteResponse);
             });
         });
+    },
+
+    deletePost: function(postId) {
+        request
+        .post('/api/deletePost')
+        .query('postId='+ postId)
+        .end(function(err, response){
+            window.location.href = window.location.origin + '/';
+        });
+    },
+
+    deleteComment: function(commentJson) {
+        request
+        .post('/api/deleteComment')
+        .send(commentJson)
+        .end(function(err, response){
+            window.location.reload();
+        });
     }
 };
