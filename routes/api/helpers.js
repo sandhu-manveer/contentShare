@@ -87,9 +87,27 @@ var findCommentById = function (comments, comment_id) {
             return child;
         }
         if (child.comments) {
-            return findCommentById(child.comments, comment_id);
+            var found = findCommentById(child.comments, comment_id);
+            if (found) return found;
         }
     }
+}
+
+/**
+ * Helper function to sort comments
+ * Should be done in db? how?
+ */
+var sortCommentsByVotes = function (comments) {
+    for (var i = 0; i < comments.length; i++) {
+        child = comments[i];
+        comments[i].score = child.votes.reduce(function(a, b) {
+                            return a + b.vote;  
+                        }, 0);
+        if (comments[i].comments) {
+            sortCommentsByVotes(comments[i].comments);
+        }
+    }
+    comments.sort((a, b) => b.score - a.score);
 }
 
 module.exports = {
@@ -98,5 +116,6 @@ module.exports = {
     createCommentFromRequestObj,
     deleteCommentFromPost,
     addCommentToPost,
-    findCommentById
+    findCommentById,
+    sortCommentsByVotes
 }

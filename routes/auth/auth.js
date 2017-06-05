@@ -53,7 +53,7 @@ router.route('/signup')
             res.render('signup', {message: req.flash()});
         })
     .post(passport.authenticate('local-signup', {
-            successRedirect: '/',
+            successRedirect: '/login',
             failureRedirect: '/signup',
             failureFlash : true
         }));

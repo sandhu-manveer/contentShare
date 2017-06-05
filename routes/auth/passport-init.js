@@ -21,6 +21,11 @@ passport.use('local-login', new localStrategy(function(email, password, done){
                 return;
             }
 
+            if(!user.verified) {   
+                done(null, false, {message: 'The account is not verified'});
+                return;
+            }
+
             user.comparePassword(password, function (err, isMatch) {
                 if (err) throw err;
                 if (!isMatch) {
@@ -31,7 +36,6 @@ passport.use('local-login', new localStrategy(function(email, password, done){
                     return;
                 }
             });
-
 
             // done(null, user); removing this prevented cant set headers err. why? ref:http://stackoverflow.com/questions/25550249/node-js-passport-error-cant-set-headers-after-they-are-sent-at-serverrespon
             // because async exec, this done is called before the function above finishes exec
@@ -85,7 +89,7 @@ function(req, email, password, done){
                                 }
                                 console.info("Sent to postmark for delivery");
                             });
-                            done(null, newUser);
+                            done(null, false, {message: 'Verification email sent'});
                         });
                     })
                     .catch(err => {
