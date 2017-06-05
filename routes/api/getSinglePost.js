@@ -9,6 +9,7 @@ var Comment = appDB.Comment;
 var helpers = require('./helpers');
 
 var checkAuth = helpers.checkAuth;
+var sortCommentsByVotes = helpers.sortCommentsByVotes;
 
 var router = express.Router();
 module.exports = router;
@@ -38,6 +39,7 @@ router.route('/getSinglePost/:postId')
             .then((post) => {
                 if (!post) res.sendStatus(404);
                 var responseJSON = {};
+                sortCommentsByVotes(post.comments);
                 responseJSON.post = post;
                 // can user be accessed from frontend
                 if (res.locals.user) {
