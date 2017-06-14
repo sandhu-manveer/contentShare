@@ -24,6 +24,10 @@ var checkAuth = function (req, res, next) {
 var createPostFromRequestObj = function (post, request) {
     post.title = request.body.title;
     post.postedBy = mongoose.Types.ObjectId(request.session.passport.user);
+    // save user vote as upvote
+    var vote = { user_id: mongoose.Types.ObjectId(request.session.passport.user), vote: 1};
+    post.votes.push(vote);
+    post.score = 0; // declared required field
 }
 
 /**

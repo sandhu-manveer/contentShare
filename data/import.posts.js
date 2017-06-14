@@ -32,3 +32,9 @@ Post.insertMany(posts)
         });
         console.log(response)
     });*/
+
+// Save single post
+/*var post = new Post();
+post.score = 10.1234767;
+
+console.log(post);*/

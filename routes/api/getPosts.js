@@ -28,16 +28,16 @@ router.route('/getPosts')
         next();
     })
     .get(function (req, res, next) {
-        var timeStamp = null;
+        var lastScore = null;
 
-        if (!req.query.lastTime) {
-            timeStamp = new Date();
+        if (!req.query.lastScore) {
+            lastScore = 1 // is this maxima?
         } else {
-            timeStamp = req.query.lastTime;
+            lastScore = req.query.lastScore;
         }
         var searchFilter = {
-            postedTime: {
-                $lt: timeStamp
+            score: {
+                $lt: lastScore
             }
         };
         if (req.query.userPost != null)
@@ -45,13 +45,13 @@ router.route('/getPosts')
 
         // check correct way to name collection and model
         // ensure password is not returned
-        Post.find(searchFilter).populate('postedBy', ['alias']).sort({ postedTime: -1 }).limit(10)
+        Post.find(searchFilter).sort({ score: -1 }).populate('postedBy', ['alias']).limit(10)
             .then((documents) => {
                 var responseJSON = {};
                 // get usernames
                 // check correct approach
                 // async not required as ref is used
-                documents.sort((a, b) => b.postedTime - a.postedTime);
+                documents.sort((a, b) => b.score - a.score);
                 responseJSON.documents = documents;
                 // can user be accessed from frontend
                 if (res.locals.user) {

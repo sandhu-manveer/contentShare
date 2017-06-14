@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var dotenv = require('dotenv');
 
 var schemaOptions = { 
     collection: 'post'
@@ -29,8 +30,30 @@ var postSchema = new mongoose.Schema({
     votes: [voteSchema],
     postedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     postedTime: { type : Date, default: Date.now },
-    comments: [commentSchema]
+    comments: [commentSchema],
+    score: { type: Number, required: true }
 }, schemaOptions);
+
+// middleware to compute post score
+// Sacalability. shift to parallel process?
+// ref:https://medium.com/hacking-and-gonzo/how-reddit-ranking-algorithms-work-ef111e33d0d9
+postSchema.pre('save', function(next) {
+    var post = this;
+
+    // if (!post.isModified('score')) return next(); // keep condition for parallel service
+
+    var seconds_diff = Math.floor((post.postedTime).getTime()/1000) - parseInt(process.env.APP_FIXED_TIME);
+
+    var votes = post.votes.reduce(function(a, b) {return a + b.vote;}, 0);
+
+    var order = Math.log10(Math.abs(Math.max(votes, 1)));
+
+    var sign = (votes > 0) ? 1 : -1;
+    if(votes === 0) sign = 0;
+
+    post.score = Math.round((sign * order + seconds_diff / 45000) * Math.pow(10, 7)) / Math.pow(10, 7);
+    next();
+});
 
 var Post = mongoose.model('post', postSchema);
 

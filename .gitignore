@@ -6,3 +6,4 @@ dist
 .vscode
 .env
 oauth.js
+*.log
