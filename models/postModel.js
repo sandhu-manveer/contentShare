@@ -28,7 +28,7 @@ var Comment = mongoose.model('comment', commentSchema);
 var postSchema = new mongoose.Schema({
     title: {type: String, required: true, minlength: 5},
     votes: [voteSchema],
-    postedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+    postedBy: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'user' },
     postedTime: { type : Date, default: Date.now },
     comments: [commentSchema],
     score: { type: Number, required: true }

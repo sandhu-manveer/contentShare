@@ -4,13 +4,13 @@ var posts = require(__dirname + '/posts.json');
 var appDB = require('../models/appDB');
 var Post = appDB.Post; 
 
-Post.insertMany(posts)
+/*Post.insertMany(posts)
     .then(() => {
         console.log('Done');
         appDB.close();
     })
     .catch((err) => console.log(err))
-
+*/
 // save
 /*user.save()
     .then(response =>   {
@@ -34,7 +34,6 @@ Post.insertMany(posts)
     });*/
 
 // Save single post
-/*var post = new Post();
-post.score = 10.1234767;
+var post = new Post({score: 0.23342});
 
-console.log(post);*/
+console.log(post);
