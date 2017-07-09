@@ -14,28 +14,20 @@
 
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
-          <li><a href="/page1">Photos</a></li>
-          <li><a href="/page2">GIFs</a></li>
-          <li><a href="/page3">Videos</a></li>
-        </ul>
         <ul class="nav navbar-nav navbar-right">
           {{# if user}}
           <li><a href="/upload">Post</a></li>
           {{else}}
-          <li><a href="/signup">Sign Up</a></li>
+          <li><a href="/login">Sign In</a></li>
           {{/ if}}
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">More+<span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="/login">Sign In</a></li>
-              <li><a href="#">Blog</a></li>
-              <li><a href="#">Health</a></li>
               {{# if user}}
-              <li role="separator" class="divider"></li>
               <li><a href="/logout">Logout</a></li>
+              {{ else }}
+              <li><a href="/signup">Sign Up</a></li>
               {{/ if}}
-
             </ul>
           </li>
         </ul>

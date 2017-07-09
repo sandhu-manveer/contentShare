@@ -37,7 +37,7 @@ router.route('/getPosts')
         }
         var searchFilter = {
             score: {
-                $lt: lastScore
+                $lte: parseFloat(lastScore)
             }
         };
         if (req.query.userPost != null)
@@ -45,7 +45,7 @@ router.route('/getPosts')
 
         // check correct way to name collection and model
         // ensure password is not returned
-        Post.find(searchFilter).sort({ score: -1 }).populate('postedBy', ['alias']).limit(10)
+        Post.find(searchFilter).populate('postedBy', ['alias']).limit(10)
             .then((documents) => {
                 var responseJSON = {};
                 // get usernames
